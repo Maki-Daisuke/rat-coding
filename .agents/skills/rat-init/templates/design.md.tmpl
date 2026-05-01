@@ -1,0 +1,31 @@
+# {{project_name}} — Design
+
+This document is a **map of the code** for {{project_name}}. It is meant to help readers — humans and AI agents — quickly locate the part of the codebase they need to work on, without re-statng what [`rationales.md`](./rationales.md) explains (the _why_) or what the source code itself shows (the _what_, in detail).
+
+Keep this file **terse and current**. A drifting map is worse than no map.
+
+## Directory Structure
+
+```
+{{project_root_name}}/
+├── README.md           # Press release: what this project is and why
+├── doc/
+│   ├── rationales.md   # Why decisions were made (and not made)
+│   └── design.md       # This file — map of the code
+└── TODO: list top-level folders and files here, with one line each
+```
+
+> One line per entry. If a folder needs more explanation, link to a section below rather than expanding the tree.
+
+## Architecture Overview
+
+TODO: a few paragraphs describing how the pieces fit together at a high level. What flows through what? Where are the seams?
+
+## Key Modules
+
+TODO: for each non-trivial module / package, a short subsection naming its responsibility and pointing at the entry point in the code.
+
+<!--
+Reminder: This file is a map. When the layout changes, update the directory
+structure section in the same change set as the code change.
+-->

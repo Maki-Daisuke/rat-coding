@@ -95,7 +95,7 @@ Rat-Coding splits its integration into two complementary pieces: an **always-on 
 
 The split matches a deeper distinction: **rules describe what kind of collaborator the AI should be at all times; skills describe specific tasks the user occasionally wants done** (`/rat-init` to scaffold docs, `/rat-audit` to check doc-implementation drift, etc.). Folding either into the other would bloat the always-on context with rarely-needed templates, or leave the philosophy dormant between explicit invocations.
 
-A natural alternative would be to enforce some of these invariants with **deterministic hooks** — for instance, blocking a commit that lacks a rationale update. That was rejected: hard rules override the user's judgment, which is exactly the creed-style enforcement Rat-Coding refuses (see [`Rat-Coding was made for the user`](#why-designmd-is-optional-not-required)). The agent should _flag_ contradictions and ask, not block.
+A natural alternative would be to enforce some of these invariants with **deterministic hooks** — for instance, blocking a commit that lacks a rationale update. That was rejected: hard rules override the user's judgment, which is exactly the creed-style enforcement Rat-Coding refuses (see [`Rat-Coding was made for the user`](#why-designmd-is-optional-not-required-but-recommended)). The agent should _flag_ contradictions and ask, not block.
 
 ### Why Workspace-Scoped Install Is the Default
 
@@ -119,17 +119,72 @@ User-wide install would have been the alternative default, with non-trivial cost
 
 The trade-off ultimately came down to: **the cost of friction is paid by everyone who tries Rat-Coding, including everyone who decides not to adopt it.** The cost of "re-install per repo" is paid only by people who already chose Rat-Coding and are now using it heavily. Lowering the barrier for the larger first group, at the price of mild friction for the smaller second group, was the better trade — and a `--user` flag preserves the user-wide path for anyone who wants it.
 
-## Why `design.md` Is Optional, Not Required
+### Why Rat-Coding's Own Files Reference Upstream Docs by Absolute URL
+
+`AGENTS.md` and the files under `.agents/skills/` will be **copied verbatim into every Rat-Coding-using repository**. That is how the install works (see [_Why Workspace-Scoped Install Is the Default_](#why-workspace-scoped-install-is-the-default)). Anything those files reference therefore has two possible meanings: the copy of the doc that lives _in this Rat-Coding repo_, or the copy that lives _in the consumer's repo_.
+
+The two are not the same file. The consumer's `doc/rationales.md` is about the consumer's project. Rat-Coding's `doc/rationales.md` is about Rat-Coding itself.
+
+If `AGENTS.md` or a skill says `[some rationale](../../../doc/rationales.md#...)`, that relative path resolves inside the consumer's repo — pointing at a file that does not contain the referenced section, or in a fresh project, does not exist at all. The link is silently broken in every install.
+
+The rule, therefore:
+
+- **Inside `AGENTS.md` and `.agents/skills/**`, never link to Rat-Coding's own `doc/rationales.md`, `README.md`, or `doc/design.md` by relative path.** Use the canonical upstream URL (`https://github.com/Maki-Daisuke/rat-coding/blob/main/...`) instead.
+- **Relative links within the consumer's project are still fine** — e.g. a skill that scaffolds files for the consumer can reference the file paths it just created. Those paths resolve correctly _because_ they are about the consumer's repo, which is exactly where the skill is now running.
+- **Inside `doc/`, relative links are the right choice** — `doc/rationales.md` and `doc/design.md` are not copied into consumer repos; they live only in Rat-Coding's own repo, so `../README.md` always points where it should.
+
+The principle: a file's link style must match where the file will be read. Files that travel with the install must reference upstream by URL; files that stay home can use relative paths.
+
+## Why `/rat-init` Is a Dialogue, Not a Template Drop
+
+A simpler design would be to have `/rat-init` write empty `README.md` and `rationales.md` files from a template and exit. That option was rejected.
+
+The Rat-Coding philosophy is **"ask why before writing,"** and the very first moment of a project is when that question matters most. Dropping empty templates leaves the user staring at blank headings, which is precisely the situation Rat-Coding was designed to avoid. A `README.md` that nobody could yet write a press release for is a project that does not yet have a reason to exist — and Rat-Coding wants that to be visible, not papered over.
+
+So `/rat-init` is a **dialogue**, not a generator:
+
+- It asks **what** the user wants to build.
+- It asks **why** — what problem this solves, for whom, and what makes that problem worth solving.
+- It investigates and surfaces **alternatives** the user may not have considered: existing tools, smaller compositions of what already exists, scope reductions. (This is the same "rationale for not building" stance that `AGENTS.md` describes for ongoing work, applied at project birth.)
+- Only when the conversation has produced enough material does it scaffold `README.md` and `doc/rationales.md` — with the **first rationale entry** ("Why this project exists") already populated from the dialogue.
+
+The skill ends by handing the keyboard back to the user, not by claiming the project is "set up." A Rat-Coding project is set up the moment the first real "why" is written down; `/rat-init` is just the structured nudge that gets you there.
+
+### When the User Is Unsure, the Job Is to Explore — Not to Extract
+
+The `/rat-init` dialogue is easy when the user already knows what they want. The interesting case is the opposite one: when the user themselves cannot yet articulate what the product is supposed to be.
+
+The wrong response, and the tempting one, is to **extract** an answer — to keep narrowing questions until the user commits to _something_, just so the skill can finish and write the file. That produces a rationale that looks complete but is actually fabricated, and every future session built on top of it inherits the lie.
+
+The right response is to **explore together**. Rat-Coding treats development as an exploratory activity (see [_Why Iterative Dialogue, Not Phased Workflow_](#why-iterative-dialogue-not-phased-workflow)): the product, the maker's understanding of it, and the user's needs all grow together through iteration. The user's "I don't quite know yet" is not a failure of preparation — it is the **starting condition** of a Rat-Coding project, and the AI's job at that moment is to help the user find the shape of what they want, not to demand they already have it.
+
+Concretely, this means the AI should:
+
+- Test the edges through follow-up questions ("what would make this _wrong_?", "who is the first person you'd show this to?") rather than asking for an executive summary.
+- Reflect what it heard back in its own words and let the user correct it; clarity often emerges in the correction.
+- Offer adjacent shapes the user can react to ("could this be X, or is it more like Y?"), since recognition is easier than generation.
+- Be willing to end the dialogue with **"we don't know yet"** — a `TODO:` rationale that honestly names the open question is more valuable than a confident-sounding fabrication.
+
+Whether the user comes in with full clarity or with only a vague pull toward something, what gets written into `rationales.md` must reflect **what is actually known at this moment** — including the gaps. The product, the rationale, and the user's understanding will all sharpen together in subsequent sessions; that is the practice. `/rat-init` is the first turn of that exploration, not the conclusion of it.
+
+## Why `design.md` Is Optional, Not Required, but Recommended
 
 The strict reading of "code is part of the SSoT" says `design.md` is redundant: the code shows _what_ was built, the rationales show _why_, and an architectural overview can be regenerated from code on demand. A purist setup needs only `README.md` and `rationales.md`.
 
-But two real cases warrant a written `design.md`:
+But there is one argument strong enough to make `design.md` the **default-on** choice in `/rat-init`, even though it remains optional: **a good `design.md` is a map for the AI agent, and a good map saves context.**
 
-- **Bridging spec to implementation.** When a feature is being designed in conversation, decisions accumulate faster than they can be captured as discrete rationales. A `design.md` is a useful holding place for "here is the shape we decided to build," before any code exists.
-- **Onboarding a contributor.** Code is the truth, but a several-thousand-line codebase is not the right entry point for a newcomer. `design.md` is a map — short, current, and pointing at the code rather than restating it.
+When an agent is asked to make a change, it does not know up front which files matter. Without guidance it searches — listing directories, reading files, following imports — and each read costs context budget. On a non-trivial repo, the agent can burn through its window just _finding_ the code, before it has done any work. A `design.md` that opens with a clear, current **directory structure** — a tree of top-level folders with one-line descriptions of what lives where — short-circuits that search. Context is the constraining resource of AI-assisted development; a map is one of the cheapest ways to defend it.
 
-Neither case is universal, so forcing one answer would either burden small projects with unused docs or leave large projects without a map. `/rat-init` therefore asks the user explicitly. This follows a more general principle:
+A few corollaries follow:
+
+- **The map must be at the top, terse, and current.** One line per folder; longer descriptions live below or in linked sections. A map that no longer matches the layout is worse than no map — the agent will follow it confidently into the wrong place. Map drift, like rationale drift, is a defect.
+- **Architectural narrative is welcome below the map**, but it is the map itself that earns `design.md` its place by default.
+- **Newcomer-onboarding is a real bonus**, but the AI-specific argument is what carries the recommendation. A user who does not pair with an agent, or whose project is small enough that the agent sees the whole tree at a glance, can reasonably opt out.
+
+So the rule is: `design.md` is **optional** by philosophy (the SSoT does not require it), **recommended** by default (because most modern Rat-Coding work is AI-paired), and **the user's call** in any given project. This follows the more general principle:
 
 > Rat-Coding was made for the user, not the user for Rat-Coding.
 
 A methodology that overrides the user's judgment in the name of philosophical consistency has stopped being a tool and started being a creed. Rat-Coding picks the tool side of that line: the philosophy informs the defaults, but the user is always allowed to say "not this time."
+
+
