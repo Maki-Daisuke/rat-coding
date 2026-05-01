@@ -33,20 +33,13 @@ Rat-Coding rests on three small things:
 
 That's it. **No spec, no ticket archaeology, no parallel design tree.** The source code is part of the Single Source of Truth — modern AI can explain code on demand, so the docs only need to carry what code _can't_ encode: the reasoning.
 
-The practice is enforced by two VS Code customizations (this repo ships both):
-
-- **An always-on instructions file** that teaches the agent to ask "why?", check past rationales for contradictions, and flag drift between docs and code.
-- **A skill** (`/rat-init`, `/rat-audit`, …) for the recurring rituals — scaffolding a new project, auditing implementation drift, capturing a fresh rationale.
-
-> The VS Code integration is the reference implementation. The practice itself — pair every decision with a rationale, treat that file as code the AI reads — travels to any agent or editor.
-
 ## Quick start
 
-> 🚧 _The instructions file and skill are still being built. Below is the intended UX — the rationales for every choice are already in [`doc/rationales.md`](./doc/rationales.md)._
+> 🚧 _`AGENTS.md` and the skills are still being built. Below is the intended UX — the rationales for every choice are already in [`doc/rationales.md`](./doc/rationales.md)._
 
 ### Install (per workspace)
 
-Rat-Coding ships as two VS Code Copilot customizations: an instructions file and a skill. By default they install into the current workspace (`.github/` and `.vscode/`), so each project opts in explicitly and you can pin a known-good version per repo.
+Rat-Coding ships as two artifacts: `AGENTS.md` at the repo root, and one or more skills under `.agents/skills/`. By default they install into the current workspace, so each project opts in explicitly and you can pin a known-good version per repo.
 
 From the root of the repo you want to use Rat-Coding in:
 
@@ -58,9 +51,9 @@ iwr https://raw.githubusercontent.com/yanother/rat-coding/main/install.ps1 | iex
 curl -fsSL https://raw.githubusercontent.com/yanother/rat-coding/main/install.sh | sh
 ```
 
-After install, the rules are active for that workspace and the slash commands (`/rat-init`, `/rat-audit`, …) are available in Copilot Chat there.
+After install, the rules are active for that workspace and the slash commands (`/rat-init`, `/rat-audit`, …) are available in any Copilot/Cursor/Claude Code/etc. chat there.
 
-> Want it everywhere? Pass `--user` (or `-User` in PowerShell) to install into your VS Code user folder instead, and Rat-Coding applies to every workspace.
+> Want it everywhere? Pass `--user` (or `-User` in PowerShell) to install into your home directory instead, and Rat-Coding applies to every workspace.
 
 ### Bootstrap a project
 
@@ -82,7 +75,7 @@ Just talk to your agent the way you always would:
 
 > _"I want to add a CLI for converting CSV to JSON."_
 
-The instructions file teaches the agent to (a) read `doc/rationales.md` first, (b) ask **why** before non-trivial choices, and (c) append a short rationale entry whenever a decision is made. You write code; the _why_ accumulates on its own.
+`AGENTS.md` teaches the agent to (a) read `doc/rationales.md` first, (b) ask **why** before non-trivial choices, and (c) append a short rationale entry whenever a decision is made. As the product grows, the _why_ accumulates alongside it.
 
 When you suspect drift, run `/rat-audit` and the agent will compare recent code against the rationales and flag anything inconsistent.
 

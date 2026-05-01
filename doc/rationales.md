@@ -73,54 +73,48 @@ This reframing is not metaphorical decoration. It explains, in one stroke, every
 
 Together with the source code, then, `rationales.md` is what the AI _executes_ when it pairs with the developer. The README is the press release for humans; `rationales.md` is the runtime spec for the AI. Treating it with the same care as code — versioned, reviewed, audited for drift — is not a flourish, it is the only way the practice works.
 
-## Why an Editor Integration (and Why VS Code Specifically)
+## Why an Editor Integration
 
-Rat-Coding is delivered as a VS Code Copilot customization, not as a standalone CLI, a hosted service, or a fully autonomous coding agent. This shape follows directly from the methodology — and once "an editor integration" is the answer, VS Code is the obvious target.
+Rat-Coding is delivered as an **editor / agent integration**, not as a standalone CLI, a hosted service, or a fully autonomous coding agent. This shape follows directly from the methodology.
 
-The deeper reason is that Rat-Coding treats **source code as part of the Single Source of Truth** (see [_Why So Few Required Documents_](#why-so-few-required-documents-code-as-part-of-the-ssot)). If code is part of the truth, then **reading code is part of the practice**. The user is expected to point at specific lines and discuss them with the AI, sometimes write code by hand, and treat the AI as a collaborator on shared source — not a vending machine that consumes a spec and emits a finished product.
+Rat-Coding treats **source code as part of the Single Source of Truth** (see [_Why So Few Required Documents_](#why-so-few-required-documents-code-as-part-of-the-ssot)). If code is part of the truth, then **reading code is part of the practice**. The user is expected to point at specific lines and discuss them with the AI, sometimes write code by hand, and treat the AI as a collaborator on shared source — not a vending machine that consumes a spec and emits a finished product.
 
 A fully autonomous coding agent — one that takes a task, disappears, and returns with a pull request — is the wrong shape for this. It minimizes exactly the activity Rat-Coding wants to maximize: the user looking at the code with the AI, asking "why this?" and "what about that?", and refining the rationale through that contact. The autonomous-agent UX optimizes for the user _not_ reading the code; Rat-Coding optimizes for the opposite.
 
 An **editor integration** is therefore the right shape: the user is already in the file, with the cursor on a specific line, and the AI is a turn away. Pointing at code, talking about code, and editing code are the same gesture.
 
-Among editors, **VS Code** was chosen because it is the most widely used coding editor in the world, has a first-class extensibility model for AI agents (instructions, skills, prompts, custom agents, hooks), and is the platform on which most of today's AI coding tooling already lives. Picking VS Code minimizes the gap between "someone hears about Rat-Coding" and "someone tries Rat-Coding."
+Concretely, Rat-Coding ships as two plain-file artifacts that today's AI coding tools already read directly: an `AGENTS.md` at the repo root and one or more `SKILL.md` files under `.agents/skills/`. No plugin, no extension, no editor-specific manifest.
 
-That said, **Rat-Coding is a practice, not a tool**. The two artifacts that define it — `doc/rationales.md` and the agent behaviors described in the instructions — are independent of any specific editor or agent. The same practice can be carried into Cursor, Zed, JetBrains, a CLI agent, or any future tool, by porting the instructions and the skill workflows to that environment. The VS Code integration is the reference implementation, not the methodology.
+### Why Both Always-On Rules and On-Demand Skills
 
-### Why Both Instructions and a Skill (Not Just One)
+Rat-Coding splits its integration into two complementary pieces: an **always-on rules file** (`AGENTS.md`) and one or more **on-demand skills** (under `.agents/skills/`). Each alone fails for a specific reason.
 
-Rat-Coding is delivered as two complementary VS Code primitives: an **always-on instructions file** and an **on-demand skill**. Each alone fails for a specific reason.
+**Rules alone** are right for the _philosophy_ — "always ask why," "always check past rationales" — because those need to be active in every conversation. But a rules file is pure prose: it cannot bundle template files, cannot define multi-step procedures invoked by name, and cannot appear as slash commands. Without those, every Rat-Coding setup would require manual scaffolding, defeating the "reproducible process" goal.
 
-**Instructions alone** is right for the _philosophy_ — "always ask why," "always check past rationales" — because those rules need to be active in every conversation. But instructions are pure prose: they cannot bundle template files, cannot define multi-step procedures invoked by name, and cannot appear as slash commands. Without those, every Rat-Coding setup would require manual scaffolding, defeating the "reproducible process" goal.
+**Skills alone** can bundle templates and define workflows, but they load only when explicitly invoked or when their description matches the request. That is fatal for the philosophy: the agent should _spontaneously_ ask "why?" at the moments the user would otherwise forget — which is precisely the moments they will forget to type `/rat-something`.
 
-**A skill alone** can bundle templates and define workflows, but it loads only when explicitly invoked or when its description matches the request. That is fatal for the philosophy: the agent should _spontaneously_ ask "why?" at the moments the user would otherwise forget — which is precisely the moments they will forget to type `/rat-something`.
+The split matches a deeper distinction: **rules describe what kind of collaborator the AI should be at all times; skills describe specific tasks the user occasionally wants done** (`/rat-init` to scaffold docs, `/rat-audit` to check doc-implementation drift, etc.). Folding either into the other would bloat the always-on context with rarely-needed templates, or leave the philosophy dormant between explicit invocations.
 
-VS Code offers other primitives — Custom Agents, Prompts, Hooks — and each was rejected for a specific reason:
-
-- **A Custom Agent** replaces the default agent for a session, with its own tool restrictions and persona. Rat-Coding is not a different _kind_ of agent; it is a way of working that should layer on top of whatever agent the user already prefers (their default, a coding agent, a refactoring agent, etc.). Forcing the user to switch agents to "enter Rat-Coding mode" would make the practice opt-in per session and incompatible with other agents — the opposite of the always-on philosophy.
-- **A Prompt** is a single parameterized task invoked by name. That is too narrow: Rat-Coding is a sustained _stance_ across many turns, not one task. (Some specific Rat-Coding operations — `/rat-init`, `/rat-audit` — could be Prompts, but a Skill subsumes Prompts and adds bundled assets, so a Skill is strictly the better fit.)
-- **Hooks** run deterministic shell commands at agent lifecycle events and can _block_ operations (e.g., reject a commit that lacks a rationale update). That sounds attractive, but it would override the user's judgment by hard rules — the exact creed-style enforcement Rat-Coding rejects (see [`Rat-Coding was made for the user`](#why-designmd-is-optional-not-required)). The agent should _flag_ contradictions and ask, not block.
-
-The split therefore matches a deeper distinction: **instructions describe what kind of collaborator the AI should be at all times; the skill describes specific tasks the user occasionally wants done** (`/rat-init` to scaffold docs, `/rat-audit` to check doc-implementation drift, etc.). Folding either into the other would bloat the always-on context with rarely-needed templates, or leave the philosophy dormant between explicit invocations.
+A natural alternative would be to enforce some of these invariants with **deterministic hooks** — for instance, blocking a commit that lacks a rationale update. That was rejected: hard rules override the user's judgment, which is exactly the creed-style enforcement Rat-Coding refuses (see [`Rat-Coding was made for the user`](#why-designmd-is-optional-not-required)). The agent should _flag_ contradictions and ask, not block.
 
 ### Why Workspace-Scoped Install Is the Default
 
-VS Code Copilot customizations can be installed in two scopes: the user folder (apply to every workspace) or the workspace itself (apply only to that repo, via committed `.github/` and `.vscode/` files). Rat-Coding's installer supports both, but **defaults to workspace-scoped**, with user-wide available behind an opt-in flag (`--user` / `-User`).
+Rat-Coding's two artifacts can in principle be installed in two scopes: in the user's home directory (so they apply to every workspace) or in the repository itself (so they apply only to that repo, via committed `AGENTS.md` and `.agents/skills/` files). Rat-Coding's installer supports both, but **defaults to workspace-scoped**, with user-wide available behind an opt-in flag (`--user` / `-User`).
 
 The reasoning prioritizes the **first-time encounter** over the **steady-state user**.
 
 Workspace-scoped install wins on:
 
 - **Opt-in per project.** Installing Rat-Coding into one repo does not silently change the agent's behavior in every other repo the user opens. Adopting a methodology should be a conscious act, not a side effect.
-- **Lower trial cost.** Trying Rat-Coding is one command in the target repo, and uninstalling is `git checkout` of two folders. No global state to reason about. The lower the cost of trying, the more people actually try.
-- **Travels with the repo.** Because the customizations are committed, collaborators and CI agents pick up the same Rat-Coding rules automatically — Rat-Coding becomes a property of the project, not of the individual developer's laptop. This matches how `.editorconfig` and similar repo-scoped conventions work.
-- **Per-repo version pinning.** A repo can pin a known-good version of the instructions and skill independent of what other projects use, avoiding "I updated Rat-Coding globally and now three of my repos behave differently" surprises.
+- **Lower trial cost.** Trying Rat-Coding is one command in the target repo, and uninstalling is deleting two paths. No global state to reason about. The lower the cost of trying, the more people actually try.
+- **Travels with the repo.** Because the artifacts are committed, collaborators and CI agents pick up the same Rat-Coding rules automatically — Rat-Coding becomes a property of the project, not of the individual developer's laptop. This matches how `.editorconfig` and similar repo-scoped conventions work.
+- **Per-repo version pinning.** A repo can pin a known-good version of the rules and skills independent of what other projects use, avoiding "I updated Rat-Coding globally and now three of my repos behave differently" surprises.
 
 User-wide install would have been the alternative default, with non-trivial costs:
 
 - **Re-installation per repo.** A developer who already loves Rat-Coding has to install it again in every new project — pure friction for the steady-state user.
 - **Distributed updates.** Bumping to a new version means visiting every Rat-Coding-using repo, vs. one update for the user-wide case. A `/rat-update` ritual or similar becomes necessary.
-- **Imposed on collaborators.** Committing `.github/` and `.vscode/` files into a repo effectively decides for collaborators that Rat-Coding is in use. On personal projects this is a feature; on shared OSS repos it can be a review-friction surprise.
+- **Imposed on collaborators.** Committing `AGENTS.md` and `.agents/skills/` into a repo effectively decides for collaborators that Rat-Coding is in use. On personal projects this is a feature; on shared OSS repos it can be a review-friction surprise.
 - **Drift across the developer's repos.** Versions can diverge between projects the same person works on, in ways that user-wide install would prevent.
 
 The trade-off ultimately came down to: **the cost of friction is paid by everyone who tries Rat-Coding, including everyone who decides not to adopt it.** The cost of "re-install per repo" is paid only by people who already chose Rat-Coding and are now using it heavily. Lowering the barrier for the larger first group, at the price of mild friction for the smaller second group, was the better trade — and a `--user` flag preserves the user-wide path for anyone who wants it.
