@@ -17,9 +17,9 @@ AI agents are wonderful at velocity. They are terrible at memory. After a few it
 - Why didn't we build feature X? — _Nobody remembers._
 - The AI silently contradicts a past decision. — _Nobody notices._
 
-"Vibe Coding" — riding the AI's momentum on intuition — is fast and frictionless, but accelerates this drift. Spec-driven approaches go the other way and write everything down upfront, which is heavier than most projects need.
+"Vibe Coding" — riding the AI's momentum on intuition — is fast and frictionless, but accelerates this drift. Spec-driven approaches go the other way and write everything down upfront — a discipline that brings real rigor and works well in the right context, but that carries a setup cost many projects don't need from day one.
 
-Rat-Coding sits between them: **start by talking, write down only the _why_, and let the AI carry the rest.**
+Rat-Coding takes a different path: **start by talking, write down only the _why_, and let the AI carry the rest.**
 
 ## How it works
 

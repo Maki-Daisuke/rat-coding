@@ -16,7 +16,7 @@ The name encodes the response: **Rat** stands for **Rationale**, positioned agai
 
 Rat-Coding deliberately does _not_ prescribe a sequence of phases — no "design phase, then implementation phase, then review phase." The reason is empirical: **nobody, not even the person building the product, knows from the start what the product actually needs to be.** A perfect spec written up front is a fiction. What actually happens in real development is that you build something, look at it running, realize "this isn't quite right" or "this could be better if...", and refine your own mental model of the ideal product through that contact with reality.
 
-The spec-first stance assumes the spec _can_ be written first, but in practice the product, the maker, and the user all grow together through the iteration. Locking the spec in early freezes the wrong artifact.
+The spec-first stance works well when requirements are stable and well-understood up front. Rat-Coding targets a different situation: projects where the product, the maker's understanding of it, and the user's needs all grow and sharpen together through iteration. When that is the context, writing the full spec first means committing to a picture that has not yet been tested against reality.
 
 What Rat-Coding aims to do instead is **accelerate that iteration loop with AI assistance, and amplify the per-iteration growth through dialogue with the AI**. Each turn is small, conversational, and immediately reflected in code or rationale. The AI is not handed a finished spec to execute; it is a collaborator helping the developer figure out what to build, one "why" at a time.
 
@@ -26,7 +26,7 @@ Rat-Coding requires only two documents per project: `README.md` and `doc/rationa
 
 **Philosophically**, Rat-Coding starts from a basic principle: **deterministic things belong in deterministic languages.** Natural language is inherently ambiguous — meaning is recovered through interpretation, and the same sentence admits different readings in different contexts. Programming languages are unambiguous by design: a program means exactly what it means and executes identically every time. When the subject matter is itself deterministic — an algorithm, an API contract, a business rule — prose encoding loses precision and re-introduces interpretation at every reading. The right medium for deterministic description is the language that enforces determinism.
 
-This is enough to reject the Spec-Driven Development (SDD) premise that a written specification is the single source of truth and code is a derivable artifact. Executable code carries nuances — ordering, edge cases, exact API contracts — that natural language cannot fully express without becoming as long and precise as the code itself. A spec detailed enough to generate the code deterministically _is_ code, just written in a worse language. And the user runs the code, not the spec; when the two disagree, the code is what the user experiences.
+This is the starting point for Rat-Coding's divergence from Spec-Driven Development (SDD). SDD treats a written specification as the single source of truth and code as a derivable artifact — a stance that serves well when the domain is stable enough to specify precisely. Rat-Coding takes a different position: executable code carries nuances — ordering, edge cases, exact API contracts — that natural language cannot fully express without becoming as long and detailed as the code itself. A spec precise enough to generate the code deterministically is, in a real sense, already a program; it has just been written in a medium that does not execute. And the user runs the code, not the spec; when the two disagree, the code is what the user experiences.
 
 The same principle extends to tests. Whether an implementation embodies the intended behavior is a deterministic question — for any given input, either it does or it does not. That question belongs in code. Test code is the executable, unambiguous expression of what "correct" means; it is the code-form of the specification. A natural-language description of expected behavior is a prose approximation of what a test suite states precisely. Where the two coexist, the test suite is authoritative. "The implementation should handle edge cases correctly" is not a spec; a failing test is.
 
@@ -37,18 +37,6 @@ So Rat-Coding treats **the source code as itself a constituent of the Single Sou
 There is a second pragmatic benefit, specific to AI-assisted development: **LLM context windows are finite**. The harder the problem, the more context the agent needs for the problem itself. Every redundant document loaded into context is context stolen from problem-solving. By keeping required documentation small, Rat-Coding deliberately preserves context budget for the actual work.
 
 This is the deeper reason Rat-Coding is _small_: not minimalism for its own sake, but because small documents are what fit alongside the code in a finite context window. The rats are small on purpose.
-
-### Rat-Coding Is a Practice, Not a Document Format
-
-Two adjacent ideas exist and neither is sufficient on its own.
-
-**Code comments** capture the _what_ and sometimes the _how_, but they cannot record decisions about code that does not exist — like "we deliberately did not implement feature X."
-
-**Architecture Decision Records (ADRs)** are much closer in spirit, and `rationales.md` may freely use ADR formatting internally. But ADRs alone are documents written by humans, for humans. A folder of ADRs the AI never reads is not meaningfully different from no ADRs at all.
-
-**Ticket / issue trackers** are another common home for "why we did this" — every decision discussed in a GitHub issue, a Jira ticket, a PR comment thread. The record is rich but _scattered_ and _verbose_: any given rationale is buried somewhere across hundreds of artifacts, wrapped in long back-and-forth. Both cost context — searching to find it, and re-reading to extract it. Rat-Coding instead consolidates the durable "why" into one compact, comprehensive file that fits in context cheaply. (If a future tool — e.g. an MCP server that surfaces ticket conclusions on demand — changes this trade-off, the calculus could shift; the choice is about today's context economics, not philosophy.)
-
-Rat-Coding's contribution is not a new document format — it is the **practice** that pairs durable rationales with explicit AI behavior: always ask why, always check past rationales, always flag contradictions.
 
 ### Why `README.md` Is Mandatory (Even Though Code Is Part of the SSoT)
 
@@ -76,6 +64,18 @@ This reframing is not metaphorical decoration. It explains, in one stroke, every
 - **It must record what was _not_ done** — code expresses positive behavior only; the AI's behavior depends just as much on negative space, which is where rationales become irreplaceable.
 
 Together with the source code, then, `rationales.md` is what the AI _executes_ when it pairs with the developer. The README is the press release for humans; `rationales.md` is the runtime spec for the AI. Treating it with the same care as code — versioned, reviewed, audited for drift — is not a flourish, it is the only way the practice works.
+
+### Rat-Coding Is a Practice, Not a Document Format
+
+The reframing above — `rationales.md` as AI runtime, not documentation — clarifies what Rat-Coding adds over three approaches that already exist.
+
+**Code comments** capture the _what_ and sometimes the _how_, but they cannot record decisions about code that does not exist — like "we deliberately did not implement feature X."
+
+**Architecture Decision Records (ADRs)** are much closer in spirit. Entries in `rationales.md` can follow ADR structure — context, decision, alternatives considered, consequences — and often should. The difference is not format but role: a folder of ADRs the AI never reads is not meaningfully different from no ADRs at all. Rat-Coding takes the ADR content model and pairs it with explicit AI behavior.
+
+**Ticket / issue trackers** are another common home for "why we did this" — every decision discussed in a GitHub issue, a Jira ticket, a PR comment thread. The record is rich but _scattered_ and _verbose_: any given rationale is buried somewhere across hundreds of artifacts, wrapped in long back-and-forth. Both cost context — searching to find it, and re-reading to extract it. Rat-Coding instead consolidates the durable "why" into one compact, comprehensive file that fits in context cheaply. (If a future tool — e.g. an MCP server that surfaces ticket conclusions on demand — changes this trade-off, the calculus could shift; the choice is about today's context economics, not philosophy.)
+
+Rat-Coding's contribution is not a new document format — it is the **practice** that pairs durable rationales with explicit AI behavior: always ask why, always check past rationales, always flag contradictions.
 
 ## Why an Editor Integration
 
