@@ -8,17 +8,9 @@ license: MIT
 
 ## What this skill does
 
-`/rat-feature` is the structured turn that happens when, in an existing Rat-Coding project, the user proposes adding something new — a feature, a command, an option, a new module. It enacts the [_Before starting anything new_](https://github.com/Maki-Daisuke/rat-coding/blob/main/AGENTS.md) clause of `AGENTS.md` as a concrete, repeatable workflow:
+`/rat-feature` enacts the [_Before starting anything new_](https://github.com/Maki-Daisuke/rat-coding/blob/main/AGENTS.md) clause of `AGENTS.md` as a concrete, repeatable workflow: dialogue about why and how → rationale on record → implement → surface discoveries → update rationale → repeat until the ideal meets the reality.
 
-1. Re-load the project's current truth (`README.md`, `doc/rationales.md`, `doc/design.md` if present).
-2. Hold a short dialogue about **why** this feature, **why now**, **whether it serves the product's press-release vision**, and **why build it instead of compose / extend / not build** — including any security risks.
-3. Cross-check against existing rationales for conflicts or staleness.
-4. Decide **how** to build it — also a dialogue. Non-trivial implementation choices are rationale-worthy decisions and get written down alongside the why.
-5. Capture both decisions — _why_ and _how_ — as a **new rationale entry** in `doc/rationales.md` _before_ writing code.
-6. **Iterate**: implement → surface discoveries → update rationale → implement again, until the ideal and the reality converge.
-7. Close the loop: keep `README.md` / `doc/design.md` in sync with what was actually built.
-
-Two non-negotiables: **the rationale comes before the code** — no honest rationale means not ready to build; and **the skill stays until the code works** — an unimplemented rationale is hollow, and the loop runs as many times as needed.
+Two non-negotiables: **rationale before code**; **the agent remains actively involved until the code is functional**.
 
 ## When NOT to use this skill
 
@@ -36,7 +28,7 @@ If the change crosses any of these lines, treat it as non-trivial and use this s
 - Introduces a new dependency, new language/runtime, or new architectural layer.
 - Removes or deprecates anything.
 
-When in doubt, use the skill. The cost of an extra paragraph in `rationales.md` is small; the cost of a silently overturned past decision is large.
+If the change involves any uncertainty about its impact or scope, use the skill. The cost of an extra paragraph in `rationales.md` is small; the cost of a silently overturned past decision is large.
 
 ## Procedure
 
@@ -73,7 +65,7 @@ Ask the following, **one at a time**, listening to the answer before moving on. 
 
 5. **What is _explicitly out of scope_** for this feature? What would you deliberately _not_ do, even though it might look adjacent? Explicit non-goals are how future sessions know the boundary.
 
-Keep the dialogue short when the user is clear and the alternatives are obviously worse. **Switch into exploration mode when the user is uncertain, or when an alternative looks credible.** When unsure, explore together rather than extract: test the edges ("what would make this wrong?"), reflect back what you heard, offer adjacent shapes ("could this be X or Y?"). It is fine — sometimes correct — to end with **"we don't know yet."** A `TODO:` naming the open question beats a fabricated rationale.
+Keep the dialogue short when the user is clear. When the user is uncertain, explore together rather than extract: test the edges, reflect back what you heard, offer adjacent shapes. Ending with **"we don't know yet"** and a `TODO:` is better than a fabricated rationale.
 
 ### 3. Cross-check against existing rationales
 
@@ -81,10 +73,8 @@ Before agreeing to write anything, verify the proposed feature against the ratio
 
 For each candidate rationale you flagged as "potentially touched":
 
-- **Does the proposal _conflict_ with this rationale?** If so, stop and surface the conflict to the user. Do not silently override past decisions, and do not silently conform to them either. Ask:
-  - Which one is wrong — the past rationale, or the proposed direction?
-  - If the past rationale is wrong, _why_? Have the premises changed (new tooling, new constraints, new evidence), or was the past decision itself a mistake that needs implementation-level correction?
-- **Does the proposal _depend on_ this rationale?** If so, check whether the rationale's premises still hold. Rationales are not commandments — they are the project's current best understanding. If the premise is stale, surface that too.
+- **Does the proposal _conflict_ with this rationale?** If so, stop and surface the conflict to the user. Do not silently override past decisions, and do not silently conform to them either. Determine which is wrong — the past rationale or the proposed direction — and whether the premises have changed (new tooling, new constraints, new evidence) or the past decision was itself a mistake.
+- **Does the proposal _depend on_ this rationale?** Check whether its premises still hold. If stale, surface that too.
 
 Possible outcomes of this check:
 
@@ -96,14 +86,16 @@ Possible outcomes of this check:
 
 Why and How are both rationale-worthy. Do not treat implementation choices — a new dependency, module shape, where the feature plugs in, public-API naming, an architectural pattern — as purely technical details to be decided silently. Give them the same Socratic treatment as the Why:
 
-1. **Ask first what the user already has in mind.** They may have a strong preference (existing conventions, team familiarity, prior art). If so, your job is to sanity-check it against the feature's shape and the project's existing rationales, not to second-guess it.
-2. **If the user is open or unsure, _make a recommendation_.** Surface 2–3 plausible options with honest trade-offs. Recommend one as the default and say why. "Option A is simpler to implement but harder to extend; option B fits the existing abstraction better at the cost of a new dependency — I'd go with B because…"
+1. **Lead with a recommendation.** Before asking the user anything, survey the existing rationales and codebase shape and propose 2–3 plausible approaches yourself. For each, state: what it is, how it fits (or tensions) with past rationales, and — critically — **how testable it is**. Architecture shapes the test surface: a design that couples concerns tightly makes unit tests hard to write and forces integration tests to cover ground that unit tests could cover more cheaply. Surface that trade-off explicitly alongside the others. Then recommend one option as the default and say why. _"Option A is simpler but hard to test in isolation; option B costs an extra abstraction boundary but lets us unit-test the core logic directly — I'd go with B because…"_
+
+2. **Then ask whether the user has a different preference.** They may have a strong leaning (existing conventions, team familiarity, prior art) that the proposal didn't account for. If so, your job is to sanity-check their preference against the feature's shape, the project's existing rationales, and testability — not to override it.
 3. **Get an explicit decision before continuing.** If the user defers ("you pick"), make the call and state _why_ — that reason becomes part of the rationale.
 4. **Flag when the How decision is non-trivial.** A How decision is non-trivial when:
    - It introduces a new dependency, architectural layer, or packaging concern.
    - It defines a public surface (API shape, CLI flag spelling, config key) that will be hard to change later.
    - It departs from patterns already established in the codebase.
    - It has security implications of its own (e.g. choosing how to handle untrusted input, where secrets are stored).
+   - It materially affects testability — making the core logic harder or easier to reach from a test.
 
    Non-trivial How decisions get their **own subsection** in the rationale entry — or, when the decision is significant enough to stand alone, their **own entry** in `doc/rationales.md`. The test: would a future session benefit from knowing why this approach was chosen over the alternatives? If yes, write it down.
 
@@ -131,7 +123,7 @@ With the rationale on the record, propose an implementation plan:
 
 - Which files will be created, edited, or deleted.
 - The order of changes (smallest reviewable steps preferred).
-- What tests / checks will validate the behavior.
+- What tests will express and validate the behavior. **Tests are the authoritative, executable specification** — plan them as first-class artifacts alongside the implementation.
 - Any open questions that the rationale flagged as `TODO:`.
 
 **Wait for explicit user approval before executing.** "Yes" / "go ahead" / "OK" is fine; silence is not. The user owns the final call; the skill never auto-runs the implementation.
@@ -157,7 +149,7 @@ write rationale  →  implement  →  surface discoveries
   - **Move the ideal toward reality.** The rationale was too ambitious, or rested on a false premise. Update it to reflect what is actually achievable — and what was learned — then continue implementation against the revised ideal.
 - **Either way, the rationale gets updated** before the next implementation pass. A rationale that no longer matches what you are actually building is a bug.
 
-Keep iterating — once, five times, however many it takes. Stopping with a rationale that has no working implementation behind it is not acceptable.
+Keep iterating however many times it takes.
 
 ### 8. Close the loop: docs and code in sync
 
@@ -166,8 +158,9 @@ After the implementation lands, **re-read the affected sections** of `README.md`
 - **`README.md`**: if the feature is user-visible, the press release may need a sentence updated. Do not add a kitchen-sink feature list — the README is still a press release, not a changelog.
 - **`doc/rationales.md`**: the entry written in step 5 should still be accurate. If implementation discoveries (step 7) changed the picture, the entry should already have been updated — confirm it was.
 - **`doc/design.md`**: if the directory layout changed, or a new module was introduced, update the map. A `design.md` whose map no longer matches the layout is worse than no map at all.
+- **Tests**: confirm that the new behavior is covered by tests. Tests are the authoritative spec; a feature whose behavior is described only in natural language (rationale or prose) but not in code is a feature whose specification is ambiguous.
 
-If anything is out of sync, propose the doc updates as part of this same change set, not later. Drift between docs and code is a defect.
+If anything is out of sync, fix it in this same change set.
 
 ### 9. Hand the keyboard back
 
@@ -178,16 +171,17 @@ End the skill with a short message that:
 - Names any `TODO:` markers that were left, and why.
 - Reminds the user that the feature's "why" is now durable — future sessions will see it.
 
-Do **not** suggest the next feature, propose a roadmap, or otherwise drift into building. The skill's job ends here.
+Do **not** suggest the next feature or propose a roadmap. The skill's job ends here.
 
 ## What you must not do
 
-- **Do not skip reading `doc/rationales.md`.** Acting without it is acting on guesswork.
-- **Do not skip the dialogue.** A feature without a stated "why" is one future sessions cannot defend.
-- **Do not silently contradict or blindly conform to a past rationale.** Surface conflicts and staleness explicitly (step 3).
-- **Do not invent rationale content.** If the user did not say it, leave a `TODO:` instead.
-- **Do not write code before the rationale is on the record.** Step 5 before step 6, always.
+- **Do not skip reading `doc/rationales.md`.**
+- **Do not skip the dialogue.**
+- **Do not silently contradict or blindly conform to a past rationale.** Surface conflicts explicitly (step 3).
+- **Do not invent rationale content.** Leave a `TODO:` instead.
+- **Do not write code before the rationale is on the record.**
 - **Do not pick semantically loaded implementation choices silently.** Either the user chose it, or you recommended and they agreed.
 - **Do not auto-run the implementation.** State the plan, wait for approval, then execute.
-- **Do not paper over discoveries or let docs drift.** Re-open the rationale; fix drift in the same change set.
-- **Do not block the user with hard rules.** Flag problems and ask. The user owns the final call.
+- **Do not paper over discoveries or let docs drift.**
+- **Do not treat tests as an optional afterthought.** Include them in the plan (step 6) and verify coverage when closing the loop (step 8).
+- **Do not block the user with hard rules.** Flag and ask; the user owns the final call.
