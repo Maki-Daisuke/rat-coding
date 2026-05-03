@@ -94,6 +94,8 @@ Possible outcomes of this check:
 
 ### 4. Decide _how_ to build it — also a dialogue
 
+> **Scope note.** This step covers _feature-level_ implementation choices: which module, which design pattern, which algorithm, how the public surface is shaped. If the decision involves choosing a language, runtime, or framework for the project — or scaffolding a new service or sub-system from scratch — stop and use `/rat-architecture` instead. That skill is designed for project-level architecture decisions, investigates the ecosystem, and handles project initialization. Return here once the architecture is settled.
+
 Why and How are both rationale-worthy. Do not treat implementation choices — a new dependency, module shape, where the feature plugs in, public-API naming, an architectural pattern — as purely technical details to be decided silently. Give them the same Socratic treatment as the Why:
 
 1. **Ask first what the user already has in mind.** They may have a strong preference (existing conventions, team familiarity, prior art). If so, your job is to sanity-check it against the feature's shape and the project's existing rationales, not to second-guess it.
