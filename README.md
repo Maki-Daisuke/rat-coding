@@ -69,6 +69,14 @@ The skill will:
 2. Scaffold `README.md` and `doc/rationales.md` (seeded with its first entry: _"Why this project exists"_).
 3. Hand the keyboard back to you.
 
+Then, when you are ready to choose architecture/frameworks and initialize the codebase with standard ecosystem tooling:
+
+```
+/rat-architecture
+```
+
+That skill investigates similar existing products, proposes options with explicit trade-offs, incorporates your preferences, and initializes the project using de facto standard procedures after explicit approval.
+
 ### Day-to-day
 
 Just talk to your agent the way you always would:
