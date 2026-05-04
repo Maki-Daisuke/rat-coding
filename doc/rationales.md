@@ -62,6 +62,7 @@ This reframing is not metaphorical decoration. It explains, in one stroke, every
 - **It must be structured** — section hierarchy, internal links, and consistent vocabulary are not stylistic preferences but a grammar the AI parses; broken structure produces wrong behavior, the same way malformed code produces wrong output.
 - **It must not lie** — drift between rationales and source code is a runtime contradiction between two parts of the same SSoT, and the AI _will_ act on whichever it sees first. A stale rationale is not a stale doc; it is a bug.
 - **It must record what was _not_ done** — code expresses positive behavior only; the AI's behavior depends just as much on negative space, which is where rationales become irreplaceable.
+- **It must be compressible** — when the durable record grows, the always-loaded runtime must be distilled into active decisions, premises, non-goals, and routing pointers rather than becoming a full historical archive.
 
 Together with the source code, then, `rationales.md` is what the AI _executes_ when it pairs with the developer. The README is the press release for humans; `rationales.md` is the runtime spec for the AI. Treating it with the same care as code — versioned, reviewed, audited for drift — is not a flourish, it is the only way the practice works.
 
@@ -111,7 +112,19 @@ A natural alternative would be to enforce some of these invariants with **determ
 
 The README explains how users move through the stable public skills. The rationale that belongs here is narrower: they are separate skills rather than one monolithic Rat-Coding skill because each turn has different triggers, context needs, and stopping conditions. Keeping them separate lets the agent load the detailed procedure for the task at hand without spending context on every other procedure.
 
-The premise is that Rat-Coding currently needs four named turns: project birth, architecture choice, product change, and drift check. If a new stable public skill is added, it should fit into that loop and be documented in the README, or get its own rationale explaining why the loop was no longer enough.
+The premise is that Rat-Coding currently needs five named turns: project birth, architecture choice, product change, drift check, and rationale lightweighting. If a new stable public skill is added, it should fit into that loop and be documented in the README, or get its own rationale explaining why the loop was no longer enough.
+
+### Why `/rat-compaction` Is a Rationale Lightweighting Workflow
+
+Large Rat-Coding projects create a pressure that the original minimalism deliberately exposed: `doc/rationales.md` is loaded every session, so if it grows into a complete historical archive it starts stealing the very context budget Rat-Coding was designed to protect. The answer is not to stop recording decisions, and not to rely entirely on search. The answer is to split the artifact by runtime role.
+
+`doc/rationales.md` remains the always-loaded **runtime kernel**: the current active decisions, their premises, explicit non-goals, and enough routing information for the agent to know when more detail is needed. Longer history, superseded background, extended alternatives, and stable subsystem-specific reasoning can move into supporting files such as `doc/rationales/*.md` when the project needs that scale. The kernel must still preserve the important conclusions and the conditions that require loading each detail file; otherwise the AI would not know what it does not know.
+
+This makes lightweighting different from summarizing away history. `/rat-compaction` should preserve the durable why, rejected alternatives, and overturned decisions, but change where and how they are represented. It should rewrite the main file into a compact index of live reasoning and route detailed material to focused supporting files only when that reduces context cost without hiding constraints.
+
+Alternatives were rejected. Keeping everything in one file preserves simplicity but fails the context-window premise as projects grow. Splitting every decision into ADR-style files from the start adds ceremony and makes the always-read runtime too thin unless the agent reliably discovers the right files. Vector search or ticket archaeology may help in the future, but today's practice still needs a small always-loaded kernel that the agent reads before non-trivial work.
+
+The trigger is a **size budget**, but the budget is intentionally project-local rather than universal: different models, teams, and domains have different context economics. If the project records an explicit budget, `/rat-audit` can flag when it is exceeded and `/rat-compaction` can act on that finding. If no budget exists, the skill should propose one before editing. Non-goals: `/rat-compaction` does not discard rationale, silently change decisions, auto-commit changes, or replace `/rat-audit`; it is the repair workflow after bloat is noticed or anticipated.
 
 ### Why `/rat-audit` Is a Report-Only Drift Audit
 

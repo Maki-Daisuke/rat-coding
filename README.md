@@ -57,7 +57,7 @@ After install, the rules will be active for that workspace and the slash command
 
 ### Bootstrap a project
 
-Rat-Coding is a small loop, not a big process. Two skills usually run once near the start of a project, then two skills repeat as the product grows:
+Rat-Coding is a small loop, not a big process. Two skills usually run once near the start of a project, then the product-growth and rationale-health skills repeat as the product grows:
 
 ```mermaid
 flowchart LR
@@ -65,6 +65,8 @@ flowchart LR
   Architecture --> Feature["/rat-feature<br/>repeat: add non-trivial change"]
   Feature --> Audit["/rat-audit<br/>repeat: check drift"]
   Audit --> Feature
+  Audit --> Compaction["/rat-compaction<br/>as needed: lighten rationales"]
+  Compaction --> Feature
 ```
 
 To start, open Copilot Chat in an empty (or existing) repo and run:
@@ -87,7 +89,7 @@ Then, when you are ready to choose architecture/frameworks and initialize the co
 
 That skill investigates similar existing products, proposes options with explicit trade-offs, incorporates your preferences, and initializes the project using de facto standard procedures after explicit approval.
 
-After that, use `/rat-feature` whenever you add a non-trivial behavior, public surface, dependency, or architectural change. Use `/rat-audit` whenever you want to check whether the README, rationales, optional design map, tests, and implementation still agree. Between those named workflows, `AGENTS.md` stays active as the always-on behavior: read `doc/rationales.md`, ask why before non-trivial choices, surface contradictions, and keep docs and code from drifting apart.
+After that, use `/rat-feature` whenever you add a non-trivial behavior, public surface, dependency, or architectural change. Use `/rat-audit` whenever you want to check whether the README, rationales, optional design map, tests, and implementation still agree. If the rationale file grows beyond its context budget, use `/rat-compaction` to keep `doc/rationales.md` as a small always-loaded runtime kernel while moving detailed history into supporting rationale files. Between those named workflows, `AGENTS.md` stays active as the always-on behavior: read `doc/rationales.md`, ask why before non-trivial choices, surface contradictions, and keep docs and code from drifting apart.
 
 ### Day-to-day
 
@@ -99,7 +101,7 @@ If that turns out to be a non-trivial change, Rat-Coding should route the conver
 
 For small fixes, typos, formatting, and behavior-preserving cleanup, no feature workflow is needed. `AGENTS.md` remains active in the background: it reminds the agent to read `doc/rationales.md`, surface conflicts, and keep docs and code from drifting apart.
 
-When you suspect drift, run `/rat-audit` and the agent will compare recent code against the rationales and flag anything inconsistent.
+When you suspect drift, run `/rat-audit` and the agent will compare recent code against the rationales and flag anything inconsistent. When you suspect the rationale record is getting too large for cheap always-on loading, run `/rat-compaction` and the agent will preserve the durable why while compacting the main file into a smaller routing kernel.
 
 ## Philosophy
 
