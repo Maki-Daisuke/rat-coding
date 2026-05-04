@@ -35,13 +35,13 @@ That's it. **No spec, no ticket archaeology, no parallel design tree.** The sour
 
 ## Quick start
 
-> 🚧 _`AGENTS.md` and the skills are still being built. Below is the intended UX — the rationales for every choice are already in [`doc/rationales.md`](./doc/rationales.md)._
+> 🚧 _`AGENTS.md` and the skills are usable, but the installer is still planned UX. The rationales for every choice are already in [`doc/rationales.md`](./doc/rationales.md)._
 
-### Install (per workspace)
+### Planned install (per workspace)
 
-Rat-Coding ships as two artifacts: `AGENTS.md` at the repo root, and one or more skills under `.agents/skills/`. By default they install into the current workspace, so each project opts in explicitly and you can pin a known-good version per repo.
+Rat-Coding ships as two artifacts: `AGENTS.md` at the repo root, and one or more skills under `.agents/skills/`. The planned installer will install them into the current workspace by default, so each project opts in explicitly and you can pin a known-good version per repo.
 
-From the root of the repo you want to use Rat-Coding in:
+Once the installer exists, the intended commands from the root of the repo you want to use Rat-Coding in are:
 
 ```pwsh
 # Windows (PowerShell)
@@ -51,9 +51,9 @@ iwr https://raw.githubusercontent.com/yanother/rat-coding/main/install.ps1 | iex
 curl -fsSL https://raw.githubusercontent.com/yanother/rat-coding/main/install.sh | sh
 ```
 
-After install, the rules are active for that workspace and the slash commands (`/rat-init`, `/rat-audit`, …) are available in any Copilot/Cursor/Claude Code/etc. chat there.
+After install, the rules will be active for that workspace and the slash commands (`/rat-init`, `/rat-audit`, …) will be available in any Copilot/Cursor/Claude Code/etc. chat there.
 
-> Want it everywhere? Pass `--user` (or `-User` in PowerShell) to install into your home directory instead, and Rat-Coding applies to every workspace.
+> Want it everywhere? The planned user-wide mode will accept `--user` (or `-User` in PowerShell) to install into your home directory instead, so Rat-Coding applies to every workspace.
 
 ### Bootstrap a project
 
