@@ -57,7 +57,17 @@ After install, the rules will be active for that workspace and the slash command
 
 ### Bootstrap a project
 
-Open Copilot Chat in an empty (or existing) repo and run:
+Rat-Coding is a small loop, not a big process. Two skills usually run once near the start of a project, then two skills repeat as the product grows:
+
+```mermaid
+flowchart LR
+  Init["/rat-init<br/>once: write the first why"] --> Architecture["/rat-architecture<br/>once: choose the stack"]
+  Architecture --> Feature["/rat-feature<br/>repeat: add non-trivial change"]
+  Feature --> Audit["/rat-audit<br/>repeat: check drift"]
+  Audit --> Feature
+```
+
+To start, open Copilot Chat in an empty (or existing) repo and run:
 
 ```
 /rat-init
@@ -77,13 +87,17 @@ Then, when you are ready to choose architecture/frameworks and initialize the co
 
 That skill investigates similar existing products, proposes options with explicit trade-offs, incorporates your preferences, and initializes the project using de facto standard procedures after explicit approval.
 
+After that, use `/rat-feature` whenever you add a non-trivial behavior, public surface, dependency, or architectural change. Use `/rat-audit` whenever you want to check whether the README, rationales, optional design map, tests, and implementation still agree. Between those named workflows, `AGENTS.md` stays active as the always-on behavior: read `doc/rationales.md`, ask why before non-trivial choices, surface contradictions, and keep docs and code from drifting apart.
+
 ### Day-to-day
 
-Just talk to your agent the way you always would:
+You can still start by talking to your agent normally:
 
 > _"I want to add a CLI for converting CSV to JSON."_
 
-`AGENTS.md` teaches the agent to (a) read `doc/rationales.md` first, (b) ask **why** before non-trivial choices, and (c) append a short rationale entry whenever a decision is made. As the product grows, the _why_ accumulates alongside it.
+If that turns out to be a non-trivial change, Rat-Coding should route the conversation through `/rat-feature`: clarify why, check alternatives, record the rationale, then implement. You can also invoke `/rat-feature` directly when you already know the change is non-trivial.
+
+For small fixes, typos, formatting, and behavior-preserving cleanup, no feature workflow is needed. `AGENTS.md` remains active in the background: it reminds the agent to read `doc/rationales.md`, surface conflicts, and keep docs and code from drifting apart.
 
 When you suspect drift, run `/rat-audit` and the agent will compare recent code against the rationales and flag anything inconsistent.
 

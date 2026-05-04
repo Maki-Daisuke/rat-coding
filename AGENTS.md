@@ -15,6 +15,7 @@
 
 When the user asks for a new feature, refactor, or change of direction:
 
+- For non-trivial feature work, follow the `/rat-feature` workflow when that skill is available. If the user did not invoke it explicitly, treat these rules as the always-on guardrails that route the conversation into the same rationale-first process.
 - **Confirm the rationale with the user before acting.** Do not start work on a non-trivial change just because it was asked for — ask _why_ this is the right thing to do.
 - **Investigate and propose alternatives as part of that dialogue.** "Building it" is rarely the only path to the user's goal. Before agreeing to build, ask:
   - Does an existing product, library, or service already solve this? — _"Could tool X be the answer instead?"_

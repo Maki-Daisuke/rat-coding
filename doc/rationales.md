@@ -97,9 +97,21 @@ Rat-Coding splits its integration into two complementary pieces: an **always-on 
 
 **Skills alone** can bundle templates and define workflows, but they load only when explicitly invoked or when their description matches the request. That is fatal for the philosophy: the agent should _spontaneously_ ask "why?" at the moments the user would otherwise forget — which is precisely the moments they will forget to type `/rat-something`.
 
+This remains true even though a pure **skill set** is attractive. Skill marketplaces and commands such as `gh skill` can make skills easier to discover, install, update, and compose. If Rat-Coding were only a bundle of skills, it could ride that ecosystem more directly. That option was considered, but rejected as the primary implementation shape: Rat-Coding's most important behavior must be active **before** the user names a workflow. The agent should notice that an ordinary request is actually a non-trivial change, ask for the missing rationale, and check past decisions even when the user did not think to invoke `/rat-feature`.
+
+A pure skill set would push too much onto skill activation. If the skill is not invoked, the always-on parts of Rat-Coding disappear: reading `doc/rationales.md` at session start, treating drift as a defect, surfacing stale premises, and asking whether a new feature should be built at all. Those are not task procedures; they are the agent's baseline operating rules. For that reason, Rat-Coding accepts the distribution cost of not being just a marketplace-native skill bundle, and keeps `AGENTS.md` as the always-on runtime while using skills for named workflows.
+
+This does not rule out skill ecosystems as a distribution channel. A future installer or registry package could still place both `AGENTS.md` and `.agents/skills/` into the right scope. If a skill ecosystem eventually supports always-on repository rules with the same reliability as `AGENTS.md`, this decision should be re-opened. Until then, the implementation shape is **AGENTS.md plus focused skills**, not a pure skill set.
+
 The split matches a deeper distinction: **rules describe what kind of collaborator the AI should be at all times; skills describe specific tasks the user occasionally wants done** (`/rat-init` to scaffold docs, `/rat-audit` to check doc-implementation drift, etc.). Folding either into the other would bloat the always-on context with rarely-needed templates, or leave the philosophy dormant between explicit invocations.
 
 A natural alternative would be to enforce some of these invariants with **deterministic hooks** — for instance, blocking a commit that lacks a rationale update. That was rejected: hard rules override the user's judgment, which is exactly the creed-style enforcement Rat-Coding refuses (see [`Rat-Coding was made for the user`](#why-designmd-is-optional-not-required-but-recommended)). The agent should _flag_ contradictions and ask, not block.
+
+### Why the Core Skills Form One Workflow
+
+The README explains how users move through the stable public skills. The rationale that belongs here is narrower: they are separate skills rather than one monolithic Rat-Coding skill because each turn has different triggers, context needs, and stopping conditions. Keeping them separate lets the agent load the detailed procedure for the task at hand without spending context on every other procedure.
+
+The premise is that Rat-Coding currently needs four named turns: project birth, architecture choice, product change, and drift check. If a new stable public skill is added, it should fit into that loop and be documented in the README, or get its own rationale explaining why the loop was no longer enough.
 
 ### Why `/rat-audit` Is a Report-Only Drift Audit
 
@@ -113,7 +125,7 @@ The premises are that Rat-Coding remains an editor/agent practice, that `README.
 
 ### Why Workspace-Scoped Install Is the Default
 
-Rat-Coding's two artifacts can in principle be installed in two scopes: in the user's home directory (so they apply to every workspace) or in the repository itself (so they apply only to that repo, via committed `AGENTS.md` and `.agents/skills/` files). Rat-Coding's installer supports both, but **defaults to workspace-scoped**, with user-wide available behind an opt-in flag (`--user` / `-User`).
+Rat-Coding's two artifacts can in principle be installed in two scopes: in the user's home directory (so they apply to every workspace) or in the repository itself (so they apply only to that repo, via committed `AGENTS.md` and `.agents/skills/` files). Rat-Coding's planned installer should support both, but **default to workspace-scoped**, with user-wide available behind an opt-in flag (`--user` / `-User`).
 
 The reasoning prioritizes the **first-time encounter** over the **steady-state user**.
 
