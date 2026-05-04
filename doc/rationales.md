@@ -101,6 +101,16 @@ The split matches a deeper distinction: **rules describe what kind of collaborat
 
 A natural alternative would be to enforce some of these invariants with **deterministic hooks** — for instance, blocking a commit that lacks a rationale update. That was rejected: hard rules override the user's judgment, which is exactly the creed-style enforcement Rat-Coding refuses (see [`Rat-Coding was made for the user`](#why-designmd-is-optional-not-required-but-recommended)). The agent should _flag_ contradictions and ask, not block.
 
+### Why `/rat-audit` Is a Report-Only Drift Audit
+
+Rat-Coding needs an explicit `/rat-audit` skill because drift is the failure mode the practice is designed to fight: `README.md`, `doc/rationales.md`, optional `doc/design.md`, tests, and implementation can each become true in isolation while contradicting each other as a system. The always-on rules tell the agent to treat drift as a defect, but auditing is an occasional, focused activity that benefits from a named procedure and a consistent report shape. That makes it a skill rather than another always-on rule.
+
+The audit is deliberately **report-only**. When it finds a contradiction, missing rationale, stale map, uncovered behavior, oversized rationale section, or unresolved `TODO:`, it should name the evidence and ask which source of truth should move. It should not decide silently that prose beats code, code beats prose, or tests beat both; Rat-Coding treats all of them as parts of the Single Source of Truth, and conflicts are decisions for the user. It should also handle early projects gracefully: if there is no implementation yet, the audit checks the documents and rationale health it can see, then says which implementation/test checks were not applicable.
+
+Alternatives were rejected. A deterministic hook or CI gate would catch drift sooner, but would violate the "flag, don't block" principle. An auto-fixer would create the same problem in softer form by choosing the winning truth without dialogue. A narrow document-only audit would miss the most important contradictions, because Rat-Coding explicitly treats code and tests as part of the truth. A generic code review skill would find bugs, but would not know to compare the product press release, rationale runtime, design map, tests, and implementation as one Rat-Coding system.
+
+The premises are that Rat-Coding remains an editor/agent practice, that `README.md` and `doc/rationales.md` remain mandatory while `doc/design.md` remains optional, and that the user's judgment remains the final arbiter when sources conflict. Non-goals: `/rat-audit` does not auto-edit files, auto-commit, run style/lint review as its main purpose, judge whether a rationale is aesthetically good, or replace `/rat-feature` when a discovered drift requires a new decision.
+
 ### Why Workspace-Scoped Install Is the Default
 
 Rat-Coding's two artifacts can in principle be installed in two scopes: in the user's home directory (so they apply to every workspace) or in the repository itself (so they apply only to that repo, via committed `AGENTS.md` and `.agents/skills/` files). Rat-Coding's installer supports both, but **defaults to workspace-scoped**, with user-wide available behind an opt-in flag (`--user` / `-User`).
@@ -190,5 +200,3 @@ So the rule is: `design.md` is **optional** by philosophy (the SSoT does not req
 > Rat-Coding was made for the user, not the user for Rat-Coding.
 
 A methodology that overrides the user's judgment in the name of philosophical consistency has stopped being a tool and started being a creed. Rat-Coding picks the tool side of that line: the philosophy informs the defaults, but the user is always allowed to say "not this time."
-
-
