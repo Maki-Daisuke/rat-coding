@@ -77,9 +77,9 @@ To start, open Copilot Chat in an empty (or existing) repo and run:
 
 The skill will:
 
-1. Ask one or two questions about what you want to build.
-2. Scaffold `README.md` and `doc/rationales.md` (seeded with its first entry: _"Why this project exists"_).
-3. Hand the keyboard back to you.
+1. Hold a short dialogue about what you want to build, why it matters now, what already exists, and what is deliberately out of scope.
+2. Scaffold `README.md` and `doc/rationales.md` (seeded with its first entry: _"Why this project exists"_), and offer `doc/design.md` by default as an optional implementation map.
+3. Hand the keyboard back to you with the first durable _why_ on the record.
 
 Then, when you are ready to choose architecture/frameworks and initialize the codebase with standard ecosystem tooling:
 
@@ -107,12 +107,12 @@ When you suspect drift, run `/rat-audit` and the agent will compare recent code 
 
 A few principles that drive every choice in this repo. The full reasoning lives in [`doc/rationales.md`](./doc/rationales.md).
 
-- **Iterative dialogue, not phased workflow.** Nobody knows the right product up front — not even the person building it. The AI isn't an executor for a plan you decided in advance; it's a collaborator who grows the product with you, one turn at a time.
-- **Code is part of the truth.** Rat-Coding does not treat the spec as the single source of truth. You are encouraged to read the code together with the AI — let it explain, discuss, point at lines, and refine the rationale through that contact — instead of shipping a spec and waiting for a finished product.
-- **Small docs, big context budget.** LLM context windows are finite. Every redundant page in the repo is context stolen from the actual problem. Keep the rats small.
-- **Flag, don't block.** The agent should _surface_ contradictions and ask. Hard rules that override the user's judgment turn a tool into a creed.
+- **Rationale is part of the product, and the AI's runtime.** `doc/rationales.md` carries the durable why so each session can continue from yesterday's reasoning.
+- **Not building matters when building gets cheap.** AI makes code easy to add; Rat-Coding records rejected alternatives and non-goals so complexity is not added by default.
+- **Truth grows through contact with reality.** Code, tests, README, and rationales each carry part of the truth; the product sharpens through dialogue with what actually runs.
+- **Methodology should serve people, not rule them.** The agent surfaces contradictions and risks, then asks. It does not turn process into a creed.
 
-> Rat-Coding was made for the user, not the user for Rat-Coding.
+> Rat-Coding was made for man, not man for Rat-Coding.
 
 ## Status
 
