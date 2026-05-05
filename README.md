@@ -35,13 +35,11 @@ That's it. **No spec, no ticket archaeology, no parallel design tree.** The sour
 
 ## Quick start
 
-> 🚧 _`AGENTS.md` and the skills are usable, but the installer is still planned UX. The rationales for every choice are already in [`doc/rationales.md`](./doc/rationales.md)._
+### Install (per workspace)
 
-### Planned install (per workspace)
+Rat-Coding ships as two artifacts: `AGENTS.md` at the repo root, and one or more skills under `.agents/skills/`. The installer places them into the current workspace by default, so each project opts in explicitly and you can pin a known-good version per repo.
 
-Rat-Coding ships as two artifacts: `AGENTS.md` at the repo root, and one or more skills under `.agents/skills/`. The planned installer will install them into the current workspace by default, so each project opts in explicitly and you can pin a known-good version per repo.
-
-Once the installer exists, the intended commands from the root of the repo you want to use Rat-Coding in are:
+From the root of the repo you want to use Rat-Coding in, run:
 
 ```pwsh
 # Windows (PowerShell)
@@ -51,9 +49,7 @@ iwr https://raw.githubusercontent.com/yanother/rat-coding/main/install.ps1 | iex
 curl -fsSL https://raw.githubusercontent.com/yanother/rat-coding/main/install.sh | sh
 ```
 
-After install, the rules will be active for that workspace and the slash commands (`/rat-init`, `/rat-audit`, …) will be available in any Copilot/Cursor/Claude Code/etc. chat there.
-
-> Want it everywhere? The planned user-wide mode will accept `--user` (or `-User` in PowerShell) to install into your home directory instead, so Rat-Coding applies to every workspace.
+After install, the rules will be active for that workspace and the slash commands (`/rat-init`, `/rat-audit`, …) will be available in any Copilot/Cursor/Claude Code/etc. chat there. Existing different files are not overwritten unless you pass `--force` / `-Force`.
 
 ### Bootstrap a project
 
