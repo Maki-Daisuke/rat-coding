@@ -12,6 +12,16 @@ When a developer pairs with an AI agent over many iterative sessions, the produc
 
 The name encodes the response: **Rat** stands for **Rationale**, positioned against "Vibe Coding" — the popular style of letting the AI run on intuition and momentum. Vibe Coding optimizes for speed in the moment; Rat-Coding optimizes for the integrity of the product over time. (And yes, _rats are small_ — a property that turns out to matter, see below.)
 
+### Why Not Building Matters More When Building Gets Cheap
+
+AI-assisted development has changed the economics of software creation. Before AI agents, implementation effort itself was a natural brake: even a small feature required design, coding, debugging, review, and maintenance work before it could exist. Vibe Coding lowers that immediate friction. If a developer can say "build it" and receive a working first version, then the act of building is no longer the scarce resource it used to be.
+
+But the thing built still has an **existence cost**. Every feature, command, dependency, configuration surface, workflow, and abstraction becomes part of the product's complexity. It must be explained, tested, debugged, secured, kept compatible, understood by future contributors, and eventually either maintained or removed. AI can make the first implementation cheap, but it does not make the resulting product surface free.
+
+That shifts the center of product judgment. In an AI-assisted world, the most valuable decision is often not "can we build this?" but **"should this exist at all?"** Rat-Coding therefore treats rejected alternatives, non-goals, and decisions not to build as first-class rationales. Recording them is not negativity or ceremony; it protects the product from repeatedly re-creating complexity just because the next agent can generate it quickly.
+
+This is one of Rat-Coding's core responses to Vibe Coding: when implementation becomes cheap, restraint becomes more valuable. The rationale for not building is part of what preserves the product's integrity over time.
+
 ### Why Iterative Dialogue, Not Phased Workflow
 
 Rat-Coding deliberately does _not_ prescribe a sequence of phases — no "design phase, then implementation phase, then review phase." The reason is empirical: **nobody, not even the person building the product, knows from the start what the product actually needs to be.** A perfect spec written up front is a fiction. What actually happens in real development is that you build something, look at it running, realize "this isn't quite right" or "this could be better if...", and refine your own mental model of the ideal product through that contact with reality.
