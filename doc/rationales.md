@@ -98,17 +98,17 @@ A fully autonomous coding agent — one that takes a task, disappears, and retur
 
 An **editor integration** is therefore the right shape: the user is already in the file, with the cursor on a specific line, and the AI is a turn away. Pointing at code, talking about code, and editing code are the same gesture.
 
-Concretely, Rat-Coding ships as two plain-file artifacts that today's AI coding tools already read directly: an `AGENTS.md` at the repo root and one or more `SKILL.md` files under `.agents/skills/`. No plugin, no extension, no editor-specific manifest.
+Concretely, a Rat-Coding project uses two plain-file artifacts that today's AI coding tools already read directly: an `AGENTS.md` at the repo root and one or more installed Rat-Coding skills. The Rat-Coding repository itself publishes those skills in the conventional `skills/<name>/SKILL.md` collection layout so standard skill managers can install them into whatever runtime directory they own.
 
 ### Why Both Always-On Rules and On-Demand Skills
 
-Rat-Coding splits its integration into two complementary pieces: an **always-on rules file** (`AGENTS.md`) and one or more **on-demand skills** (under `.agents/skills/`). Each alone fails for a specific reason.
+Rat-Coding splits its integration into two complementary pieces: an **always-on rules file** (`AGENTS.md`) and one or more **on-demand skills**. Each alone fails for a specific reason.
 
 **Rules alone** are right for the _philosophy_ — "always ask why," "always check past rationales" — because those need to be active in every conversation. But a rules file is pure prose: it cannot bundle template files, cannot define multi-step procedures invoked by name, and cannot appear as slash commands. Without those, every Rat-Coding setup would require manual scaffolding, defeating the "reproducible process" goal.
 
 **Skills alone** can bundle templates and define workflows, but they load only when explicitly invoked or when their description matches the request. That is fatal for the philosophy: the agent should _spontaneously_ ask "why?" at the moments the user would otherwise forget — which is precisely the moments they will forget to type `/rat-something`.
 
-This remains true even though a pure **skill set** is attractive. Skill marketplaces can make workflows easier to discover, install, update, and compose, but Rat-Coding's most important behavior must be active **before** the user names a workflow. If the skill is not invoked, the always-on parts disappear: reading `doc/rationales.md` at session start, treating drift as a defect, surfacing stale premises, and asking whether a new feature should be built at all. A future registry may still be a distribution channel, but it must preserve project-visible installation rather than turn Rat-Coding into ambient user configuration. Until then, the implementation shape is **AGENTS.md plus focused skills**, not a pure skill set.
+This remains true even though a pure **skill runtime** is attractive. Skill marketplaces can make workflows easier to discover, install, update, and compose, but Rat-Coding's most important behavior must be active **before** the user names a workflow. If the skill is not invoked, the always-on parts disappear: reading `doc/rationales.md` at session start, treating drift as a defect, surfacing stale premises, and asking whether a new feature should be built at all. A skill registry is therefore a good channel for the on-demand workflows, but it cannot by itself express project adoption. The user installs only `/rat-init` with a standard skill manager, then `/rat-init` installs or merges the project-visible `AGENTS.md` rules, offers to install the remaining Rat-Coding skills, reloads the rules, and scaffolds the project truth files.
 
 The split matches a deeper distinction: **rules describe what kind of collaborator the AI should be at all times; skills describe specific tasks the user occasionally wants done** (`/rat-init` to scaffold docs, `/rat-audit` to check doc-implementation drift, etc.). Folding either into the other would bloat the always-on context with rarely-needed templates, or leave the philosophy dormant between explicit invocations.
 
@@ -142,23 +142,60 @@ Alternatives were rejected. A deterministic hook or CI gate would catch drift so
 
 The premises are that Rat-Coding remains an editor/agent practice, that `README.md` and `doc/rationales.md` remain mandatory while `doc/design.md` remains optional, and that the user's judgment remains the final arbiter when sources conflict. Non-goals: `/rat-audit` does not auto-edit files, auto-commit, run style/lint review as its main purpose, judge whether a rationale is aesthetically good, or replace `/rat-feature` when a discovered drift requires a new decision.
 
-### Why Install Is Workspace-Scoped Only
+### Why Rat-Coding Is Installed as Project Structure
 
-Rat-Coding is installed into the repository itself, via committed `AGENTS.md` and `.agents/skills/` files. This is not merely the safest default; it is the natural shape of the practice. A Rat-Coding project already commits `README.md` and `doc/rationales.md` as part of its Single Source of Truth. The files that teach the AI how to work with that truth — `AGENTS.md` and the Rat-Coding skills — belong in the same project structure.
+Rat-Coding adoption is installed into the repository itself through a committed `AGENTS.md` file. This is not merely the safest default; it is the natural shape of the practice. A Rat-Coding project already commits `README.md` and `doc/rationales.md` as part of its Single Source of Truth. The file that teaches the AI how to work with that truth must therefore be mandatory project structure, not a personal editor preference. The Rat-Coding skills are also mandatory to the full workflow, but their installation and update mechanics belong to standard Agent Skills managers such as `gh skill`, `npx skills`, APM, or compatible runtime tooling.
 
 Earlier drafts considered a user-wide mode (`--user` / `-User`) that would install into the user's home directory. That option was rejected for two reasons. First, it is technically unreliable as a generic promise: different AI coding tools discover always-on rules and skills from different locations, so `$HOME` is not a stable cross-editor install target. Second, and more importantly, it applies Rat-Coding to projects that have not chosen Rat-Coding. A non-Rat-Coding repository may not have `doc/rationales.md`, may not want Rat-Coding's dialogue-first workflow, and may follow a different agent convention entirely. Installing Rat-Coding user-wide would make it intrude on those projects as ambient personal configuration instead of appearing only where the project has explicitly adopted it.
 
 The conclusion is that **Rat-Coding adoption should be visible in the project**. The cost of reinstalling per repository is paid only by projects that explicitly choose Rat-Coding; the cost of user-wide leakage would be paid by every unrelated project the developer edits. Rat-Coding should not become ambient pressure on projects that did not opt in, so the `--user` / `-User` option was removed rather than shipped with misleading semantics.
 
-### Why the Installer Copies the Published Artifacts Conservatively
+### Why Skill Managers Install Skills and `/rat-init` Installs Rules
 
-The installer is intentionally small and cross-platform: `install.ps1` for PowerShell and `install.sh` for POSIX shells. Both scripts fetch the Rat-Coding repository archive by default, then copy only the installable artifacts — `AGENTS.md` and every skill directory under `.agents/skills/`, including `/rat-init` — into the current workspace. A local source checkout can be supplied for development and testing, but the public install path does not require Git, package managers, or a language runtime beyond the user's shell and standard archive tools.
+Rat-Coding deliberately uses the standard Agent Skills repository layout: each workflow lives under `skills/<name>/SKILL.md`. That shape is understood by skill managers such as `gh skill`, `npx skills`, and [APM](https://github.com/microsoft/apm), and it avoids making Rat-Coding invent a package manager for artifacts the ecosystem can already install and update.
 
-Existing files are treated as user-owned. If `AGENTS.md` or an installed Rat-Coding skill already exists with different content, the installer stops unless the user explicitly passes `--force` / `-Force`. This matches Rat-Coding's broader opt-in stance: installing should make adoption easy, but it should not silently erase a repository's existing agent rules or custom skills. The non-goals are user-wide installation, package-manager installation, automatic updates, merging arbitrary pre-existing `AGENTS.md` prose, and deleting unrelated files under `.agents/skills/`.
+Earlier drafts kept Rat-Coding-specific shell installers, first at the repository root and then bundled under `/rat-init`. That was rejected once the repository adopted the standard skill collection shape. If `gh skill`, `npx skills`, APM, or another compatible manager can install the skills, Rat-Coding should not ship a parallel installer that duplicates their job, creates a second update path, and has to chase every runtime's skill directory conventions.
+
+The remaining artifact is `AGENTS.md`, and it is different from a skill. Installing it is the moment a project adopts Rat-Coding's always-on behavior, and a project may already have its own `AGENTS.md`. That decision needs Rat-Coding-specific dialogue: preserve existing rules, ask before merging, and place Rat-Coding's rules in a clearly marked managed block when approved. Generic skill managers should not be expected to perform that semantic adoption step.
+
+So the public bootstrap has two layers. First, use a standard skill manager to install only `/rat-init`. Second, run `/rat-init` in the project; it installs or merges `AGENTS.md`, then checks and offers to install the remaining Rat-Coding skills through the same class of manager. Non-goals: user-wide installation, Rat-Coding-specific skill installers, automatic updates outside the skill manager, unmarked semantic rewrites of arbitrary `AGENTS.md` prose, and deleting unrelated skill files.
+
+### Why Rat-Coding Does Not Standardize on APM
+
+Of the available skill managers, [APM](https://github.com/microsoft/apm) is the closest fit on paper. It is the only one that treats both **instructions and skills as a single package** — exactly the shape Rat-Coding distributes (`AGENTS.md` plus the Rat-Coding skill set). It also ships a project-root manifest and lockfile pair, which would give Rat-Coding adoption a clean, reproducible install surface. By technical fit alone, picking APM as the official Rat-Coding package manager would be the obvious move.
+
+That option was nevertheless rejected, for a reason that runs to the heart of the practice: **a project adopting Rat-Coding must not, as a side effect, be forced to adopt a particular package manager.**
+
+Rat-Coding is a methodology — a way of pairing with an AI agent through durable rationales. Its on-disk footprint in a consumer project is intentionally minimal: `AGENTS.md`, `README.md`, `doc/rationales.md`, and optionally `doc/design.md`. None of those require a package manager to exist. A project should be able to adopt Rat-Coding using whichever skill manager its team or runtime already uses, including ones that have nothing to do with APM. Mandating APM would attach a second, unrelated decision to every "yes" the user gives Rat-Coding: not just "I want this practice," but also "I am willing to put `apm.yml` and `apm.lock.yaml` into my repo and install APM's CLI in my environment." That is a much bigger ask, and it conflates two concerns that should stay separate.
+
+The same reasoning rules out picking _any_ single manager as the official one. `gh skill` ties the project to the GitHub CLI; `npx skills` ties it to the Node ecosystem; APM ties it to its own CLI and manifest format. Each is a reasonable choice in some environments and a poor fit in others. Rat-Coding therefore stays manager-agnostic: it ships the standard `skills/<name>/SKILL.md` collection layout, and lets `/rat-init` detect which manager the project already uses (see [_Why /rat-init Detects the Skill Manager from Project Markers_](#why-rat-init-detects-the-skill-manager-from-project-markers)). If a future skill manager becomes a near-universal default, this rationale should be revisited; until then, neutrality is the position that keeps adoption cheap.
+
+Non-goals: blessing any single skill manager as the Rat-Coding default, shipping APM-specific manifests in this repository, refusing to support managers that bundle instructions less elegantly than APM does, or treating the manager choice as part of Rat-Coding's identity.
+
+### Why `/rat-init` Detects the Skill Manager from Project Markers
+
+When `/rat-init` finds that some Rat-Coding skills are missing, it must pick a skill manager to install them with. There are several plausible signals to choose from, and the decision shapes how reliable the install step is.
+
+Probing the user's `PATH` (`which gh`, `which npx`, `which apm`) was rejected. Tool availability on `PATH` says nothing about which manager actually owns this project's skills. A developer can have all three installed; only one of them — at most — is the right one for this repo. Picking by command availability silently risks installing into a manager the project does not use, creating a parallel install path the project's existing lockfile cannot see.
+
+The chosen approach is to detect the manager from **artifacts the manager itself leaves in the project**, in this priority order:
+
+1. **APM** — `apm.lock.yaml` (and usually `apm.yml`) at the repo root. APM is the only manager that ships a project-root manifest plus lockfile pair, in the npm/cargo style.
+2. **`npx skills`** — `skills-lock.json` or `.skills.json` at the repo root. Vercel Labs' `skills` CLI uses these as its package.json/package-lock.json analogues.
+3. **`gh skill`** — any installed `**/SKILL.md` whose frontmatter contains `metadata.github-repo`, `metadata.github-ref`, or `metadata.github-tree-sha`. `gh skill` does not write a project-level lockfile; instead it injects "Portable Provenance" into each installed skill so `gh skill update` can compare the local tree SHA against the remote. The presence of those keys is therefore the canonical "this project's skills were installed by `gh skill`" signal.
+4. **None of the above** — ask the user. Do not guess.
+
+The order matters: APM and `npx skills` markers are unambiguous root-level files, so they are checked first; `gh skill`'s marker requires looking inside skill files, so it is checked last to avoid spurious matches in repos that contain unrelated skill collections.
+
+The fourth case — fresh repo with no markers — is deliberately a question, not a default. In a brand-new project there is no project signal, and Rat-Coding's general stance is that the AI flags ambiguity rather than picking silently (see [_Rat-Coding was made for the user_](#why-designmd-is-optional-not-required-but-recommended)). Choosing a manager on the user's behalf at this moment would lock the project into an install path the user did not consciously pick.
+
+The premises are that today's three managers each leave a distinct project artifact, and that those artifacts are stable enough to detect. If a future manager is adopted that leaves no project trace at all, this rationale needs to be revisited; the question case (#4) absorbs that gap until it is.
+
+Non-goals: probing `PATH` to pick a manager, defaulting to a "house" manager when markers are absent, installing through more than one manager in the same project, or rewriting markers to switch managers without the user asking.
 
 ### Why Rat-Coding's Own Files Reference Upstream Docs by Absolute URL
 
-`AGENTS.md` and the files under `.agents/skills/` will be **copied verbatim into every Rat-Coding-using repository**. That is how the install works (see [_Why Install Is Workspace-Scoped Only_](#why-install-is-workspace-scoped-only)). Anything those files reference therefore has two possible meanings: the copy of the doc that lives _in this Rat-Coding repo_, or the copy that lives _in the consumer's repo_.
+`AGENTS.md` and the files under `skills/` travel into Rat-Coding-using repositories: `AGENTS.md` through `/rat-init`, and skills through the user's skill manager. Anything those files reference therefore has two possible meanings: the copy of the doc that lives _in this Rat-Coding repo_, or the copy that lives _in the consumer's repo_.
 
 The two are not the same file. The consumer's `doc/rationales.md` is about the consumer's project. Rat-Coding's `doc/rationales.md` is about Rat-Coding itself.
 
@@ -166,26 +203,28 @@ If `AGENTS.md` or a skill says `[some rationale](../../../doc/rationales.md#...)
 
 The rule, therefore:
 
-- **Inside `AGENTS.md` and `.agents/skills/**`, never link to Rat-Coding's own `doc/rationales.md`, `README.md`, or `doc/design.md` by relative path.** Use the canonical upstream URL (`https://github.com/Maki-Daisuke/rat-coding/blob/main/...`) instead.
+- **Inside `AGENTS.md` and `skills/**`, never link to Rat-Coding's own `doc/rationales.md`, `README.md`, or `doc/design.md` by relative path.** Use the canonical upstream URL (`https://github.com/Maki-Daisuke/rat-coding/blob/main/...`) instead.
 - **Relative links within the consumer's project are still fine** — e.g. a skill that scaffolds files for the consumer can reference the file paths it just created. Those paths resolve correctly _because_ they are about the consumer's repo, which is exactly where the skill is now running.
 - **Inside `doc/`, relative links are the right choice** — `doc/rationales.md` and `doc/design.md` are not copied into consumer repos; they live only in Rat-Coding's own repo, so `../README.md` always points where it should.
 
 The principle: a file's link style must match where the file will be read. Files that travel with the install must reference upstream by URL; files that stay home can use relative paths.
 
-## Why `/rat-init` Is a Dialogue, Not a Template Drop
+## Why `/rat-init` Installs Rules Before Scaffolding Docs
 
-A simpler design would be to have `/rat-init` write empty `README.md` and `rationales.md` files from a template and exit. That option was rejected.
+`/rat-init` is the **project adoption workflow**, not just a document scaffolder. After the user installs that one bootstrap skill through a skill manager, its first job is to place or merge the durable `AGENTS.md` rules into the repository, then ensure the remaining Rat-Coding skills are available through the same class of skill manager and reload `AGENTS.md`. That makes the adoption visible, versioned, and local to the project before any project truth is written.
+
+After the rules are present, `/rat-init` still must not become a template drop. A simpler design would be to write empty `README.md` and `doc/rationales.md` files from a template and exit. That option was rejected.
 
 The Rat-Coding philosophy is **"ask why before writing,"** and the very first moment of a project is when that question matters most. Dropping empty templates leaves the user staring at blank headings, which is precisely the situation Rat-Coding was designed to avoid. A `README.md` that nobody could yet write a press release for is a project that does not yet have a reason to exist — and Rat-Coding wants that to be visible, not papered over.
 
-So `/rat-init` is a **dialogue**, not a generator:
+So the document-scaffolding part of `/rat-init` is a **dialogue**, not a generator:
 
 - It asks **what** the user wants to build.
 - It asks **why** — what problem this solves, for whom, and what makes that problem worth solving.
 - It investigates and surfaces **alternatives** the user may not have considered: existing tools, smaller compositions of what already exists, scope reductions. (This is the same "rationale for not building" stance that `AGENTS.md` describes for ongoing work, applied at project birth.)
 - Only when the conversation has produced enough material does it scaffold `README.md` and `doc/rationales.md` — with the **first rationale entry** ("Why this project exists") already populated from the dialogue.
 
-The skill ends by handing the keyboard back to the user, not by claiming the project is "set up." A Rat-Coding project is set up the moment the first real "why" is written down; `/rat-init` is just the structured nudge that gets you there.
+The skill ends by handing the keyboard back to the user, not by claiming the product is complete. A Rat-Coding project is set up when the runtime is installed and the first real "why" is written down; `/rat-init` is the structured nudge that gets both pieces in place.
 
 ### When the User Is Unsure, the Job Is to Explore — Not to Extract
 
@@ -206,7 +245,7 @@ Whether the user comes in with full clarity or with only a vague pull toward som
 
 ## Why `design.md` Is Optional, Not Required, but Recommended
 
-The strict reading of "code is part of the SSoT" says `design.md` is redundant: the code shows _what_ was built, the rationales show _why_, and an architectural overview can be regenerated from code on demand. A purist setup needs only `README.md` and `rationales.md`.
+The strict reading of "code is part of the SSoT" says `design.md` is redundant: the code shows _what_ was built, the rationales show _why_, and an architectural overview can be regenerated from code on demand. A purist project-truth setup needs only `README.md` and `doc/rationales.md`.
 
 But there is one argument strong enough to make `design.md` the **default-on** choice in `/rat-init`, even though it remains optional: **a good `design.md` is a map for the AI agent, and a good map saves context.**
 

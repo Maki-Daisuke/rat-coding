@@ -23,33 +23,37 @@ Rat-Coding takes a different path: **start by talking, write down only the _why_
 
 ## How it works
 
-Rat-Coding rests on three small things:
+Rat-Coding rests on a small project-visible runtime plus two project truth files:
 
-|                            | What                                                                                             | Where     |
-| -------------------------- | ------------------------------------------------------------------------------------------------ | --------- |
-| 📰 **`README.md`**         | The project's press release. The idealized image of the product, written for users. _Mandatory._ | repo root |
-| 🐀 **`doc/rationales.md`** | The durable "why". Every non-trivial design decision and the alternatives rejected. _Mandatory._ | repo      |
-| 🗺️ **`doc/design.md`**     | A map of the implementation, for contributors who want one. _Optional._                          | repo      |
+|                            | What                                                                                             | Where            |
+| -------------------------- | ------------------------------------------------------------------------------------------------ | ---------------- |
+| **`AGENTS.md`**            | The always-on rules that make the agent read and act on the project's rationales. _Mandatory._   | repo root        |
+| **Rat-Coding skills**      | The workflows (`/rat-init`, `/rat-feature`, `/rat-audit`, ...), installed by a standard skill manager. _Mandatory._ | repo        |
+| 📰 **`README.md`**         | The project's press release. The idealized image of the product, written for users. _Mandatory._ | repo root        |
+| 🐀 **`doc/rationales.md`** | The durable "why". Every non-trivial design decision and the alternatives rejected. _Mandatory._ | repo             |
+| 🗺️ **`doc/design.md`**     | A map of the implementation, for contributors who want one. _Optional._                          | repo             |
 
 That's it. **No spec, no ticket archaeology, no parallel design tree.** The source code is part of the Single Source of Truth — modern AI can explain code on demand, so the docs only need to carry what code _can't_ encode: the reasoning.
 
 ## Quick start
 
-### Install (per workspace)
+### Bootstrap Rat-Coding
 
-Rat-Coding ships as two artifacts: `AGENTS.md` at the repo root, and one or more skills under `.agents/skills/`. The installer places them into the current workspace by default, so each project opts in explicitly and you can pin a known-good version per repo.
+Rat-Coding is installed per project. The intended bootstrap path is to install only the `/rat-init` skill with your agent's standard skill manager, then run `/rat-init` in the repository. `/rat-init` installs or merges the always-on `AGENTS.md` rules from its bundled asset, checks whether the rest of the Rat-Coding skills are installed, offers to install them with the detected skill manager when missing, reloads the rules for the current session, then helps create `README.md` and `doc/rationales.md` through dialogue.
 
-From the root of the repo you want to use Rat-Coding in, run:
+Bootstrap has two steps:
 
-```pwsh
-# Windows (PowerShell)
-iwr https://raw.githubusercontent.com/yanother/rat-coding/main/install.ps1 | iex
+1. Install only the `/rat-init` skill from this repository. Use a standard Agent Skills installer, for example:
 
-# macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/yanother/rat-coding/main/install.sh | sh
-```
+  ```sh
+  gh skill install Maki-Daisuke/rat-coding rat-init
+  npx skills add Maki-Daisuke/rat-coding rat-init
+  apm install Maki-Daisuke/rat-coding --skill rat-init
+  ```
 
-After install, the rules will be active for that workspace and the slash commands (`/rat-init`, `/rat-audit`, …) will be available in any Copilot/Cursor/Claude Code/etc. chat there. Existing different files are not overwritten unless you pass `--force` / `-Force`.
+2. Open the target project directory and run `/rat-init`.
+
+After `/rat-init` runs, the rules will be active for that workspace and the rest of the slash commands (`/rat-feature`, `/rat-audit`, …) should be available through the same skill manager. Existing different files are not overwritten unless the user explicitly approves replacement. If the target project already has `AGENTS.md`, `/rat-init` asks whether to merge Rat-Coding's rules into it; approved merges preserve the existing file and add Rat-Coding in a marked managed block. There is no Rat-Coding shell installer; skill installation belongs to `gh skill`, `npx skills`, APM, or another compatible skill manager.
 
 ### Bootstrap a project
 
@@ -65,7 +69,7 @@ flowchart LR
   Compaction --> Feature
 ```
 
-To start, open Copilot Chat in an empty (or existing) repo and run:
+After installing the `/rat-init` skill, open Copilot Chat in an empty (or existing) repo and run:
 
 ```
 /rat-init
@@ -73,9 +77,12 @@ To start, open Copilot Chat in an empty (or existing) repo and run:
 
 The skill will:
 
-1. Hold a short dialogue about what you want to build, why it matters now, what already exists, and what is deliberately out of scope.
-2. Scaffold `README.md` and `doc/rationales.md` (seeded with its first entry: _"Why this project exists"_), and offer `doc/design.md` by default as an optional implementation map.
-3. Hand the keyboard back to you with the first durable _why_ on the record.
+1. Install or merge the project-visible `AGENTS.md` rules from its bundled asset.
+2. Check `.agents/` and `.claude/` for the rest of the Rat-Coding skills, then offer to install missing skills with the detected skill manager.
+3. Reload `AGENTS.md` for the current session.
+4. Hold a short dialogue about what you want to build, why it matters now, what already exists, and what is deliberately out of scope.
+5. Scaffold `README.md` and `doc/rationales.md` (seeded with its first entry: _"Why this project exists"_), and offer `doc/design.md` by default as an optional implementation map.
+6. Hand the keyboard back to you with the first durable _why_ on the record.
 
 Then, when you are ready to choose architecture/frameworks and initialize the codebase with standard ecosystem tooling:
 
