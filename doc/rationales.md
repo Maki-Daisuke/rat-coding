@@ -132,6 +132,18 @@ Alternatives were rejected. Keeping everything in one file preserves simplicity 
 
 The trigger is a **size budget**, but the budget is intentionally project-local rather than universal: different models, teams, and domains have different context economics. If the project records an explicit budget, `/rat-audit` can flag when it is exceeded and `/rat-compaction` can act on that finding. If no budget exists, the skill should propose one before editing. Non-goals: `/rat-compaction` does not discard rationale, silently change decisions, auto-commit changes, or replace `/rat-audit`; it is the repair workflow after bloat is noticed or anticipated.
 
+### Why This Project Does Not Record an Explicit Context Budget
+
+This repository intentionally omits a hardcoded line or token limit for `doc/rationales.md`. Three reasons:
+
+1. **The right number varies by model.** Different LLMs have different context windows and different costs-per-token for reasoning over loaded text. A number that is tight for a small model is trivially small for a large one; locking in a figure would make the rule misleading in one direction or the other depending on the tool in use.
+
+2. **The right number varies by workload.** A session dedicated to a complex feature leaves less headroom for background docs than a session that opens with a fresh question. The useful threshold is relative to what else is in context, not an absolute line count.
+
+3. **LLM self-awareness is the right oracle.** A model that knows its own context window can propose a budget calibrated to its actual constraint — as a proportion of its window rather than as a universal constant. Hardcoding a number removes that opportunity and bakes in today's answer to a question that improves as models improve.
+
+The consequence: when `/rat-compaction` is invoked on this project without a recorded budget, the skill should propose one relative to its own context window size, explain the reasoning to the user, and ask for approval before acting. This is the preferred interaction for every Rat-Coding project whose budget is not yet on record, and it is why the rule was written as a proposal-and-approval step rather than a hard gate.
+
 ### Why `/rat-audit` Is a Report-Only Drift Audit
 
 Rat-Coding needs an explicit `/rat-audit` skill because drift is the failure mode the practice is designed to fight: `README.md`, `doc/rationales.md`, optional `doc/design.md`, tests, and implementation can each become true in isolation while contradicting each other as a system. The always-on rules tell the agent to treat drift as a defect, but auditing is an occasional, focused activity that benefits from a named procedure and a consistent report shape. That makes it a skill rather than another always-on rule.
