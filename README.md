@@ -25,13 +25,13 @@ Rat-Coding takes a different path: **start by talking, write down only the _why_
 
 Rat-Coding rests on a small project-visible runtime plus two project truth files:
 
-|                            | What                                                                                             | Where            |
-| -------------------------- | ------------------------------------------------------------------------------------------------ | ---------------- |
-| **`AGENTS.md`**            | The always-on rules that make the agent read and act on the project's rationales. _Mandatory._   | repo root        |
-| **Rat-Coding skills**      | The workflows (`/rat-init`, `/rat-feature`, `/rat-audit`, ...), installed by a standard skill manager. _Mandatory._ | repo        |
-| 📰 **`README.md`**         | The project's press release. The idealized image of the product, written for users. _Mandatory._ | repo root        |
-| 🐀 **`doc/rationales.md`** | The durable "why". Every non-trivial design decision and the alternatives rejected. _Mandatory._ | repo             |
-| 🗺️ **`doc/design.md`**     | A map of the implementation, for contributors who want one. _Optional._                          | repo             |
+|                            | What                                                                                                                | Where     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------- |
+| **`AGENTS.md`**            | The always-on rules that make the agent read and act on the project's rationales. _Mandatory._                      | repo root |
+| **Rat-Coding skills**      | The workflows (`/rat-init`, `/rat-feature`, `/rat-audit`, ...), installed by a standard skill manager. _Mandatory._ | repo      |
+| 📰 **`README.md`**         | The project's press release. The idealized image of the product, written for users. _Mandatory._                    | repo root |
+| 🐀 **`doc/rationales.md`** | The durable "why". Every non-trivial design decision and the alternatives rejected. _Mandatory._                    | repo      |
+| 🗺️ **`doc/design.md`**     | A map of the implementation, for contributors who want one. _Optional._                                             | repo      |
 
 That's it. **No spec, no ticket archaeology, no parallel design tree.** The source code is part of the Single Source of Truth — modern AI can explain code on demand, so the docs only need to carry what code _can't_ encode: the reasoning.
 
@@ -43,13 +43,13 @@ Rat-Coding is installed per project. The intended bootstrap path is to install o
 
 Bootstrap has two steps:
 
-1. Install only the `/rat-init` skill from this repository. Use a standard Agent Skills installer, for example:
+1. Install only the `/rat-init` skill from this repository. Use any standard Agent Skills installer, for example:
 
-  ```sh
-  gh skill install Maki-Daisuke/rat-coding rat-init
-  npx skills add Maki-Daisuke/rat-coding rat-init
-  apm install Maki-Daisuke/rat-coding --skill rat-init
-  ```
+```sh
+gh skill install Maki-Daisuke/rat-coding rat-init
+npx skills add Maki-Daisuke/rat-coding rat-init
+apm install Maki-Daisuke/rat-coding --skill rat-init
+```
 
 2. Open the target project directory and run `/rat-init`.
 

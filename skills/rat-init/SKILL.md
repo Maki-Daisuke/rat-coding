@@ -1,6 +1,6 @@
 ---
 name: rat-init
-description: 'Bootstrap a Rat-Coding project after the user installs only /rat-init: install or merge the project-visible AGENTS.md rules, check/install the rest of the Rat-Coding skills with the user-approved skill manager, reload the rules, then hold a short Socratic dialogue to scaffold README.md and doc/rationales.md when needed. Use when the user runs /rat-init, asks to start a Rat-Coding project, asks to adopt Rat-Coding in a repo, or asks to bootstrap docs for a fresh repo. Architecture/framework selection and project initialization are handled by /rat-architecture.'
+description: "Bootstrap a Rat-Coding project after the user installs only /rat-init: install or merge the project-visible AGENTS.md rules, check/install the rest of the Rat-Coding skills with the user-approved skill manager, reload the rules, then hold a short Socratic dialogue to scaffold README.md and doc/rationales.md when needed. Use when the user runs /rat-init, asks to start a Rat-Coding project, asks to adopt Rat-Coding in a repo, or asks to bootstrap docs for a fresh repo. Architecture/framework selection and project initialization are handled by /rat-architecture."
 license: MIT
 ---
 
@@ -65,12 +65,13 @@ If any are missing, follow this sequence:
    2. **`npx skills`** — `skills-lock.json` or `.skills.json` at the repo root.
    3. **`gh skill`** — any installed `**/SKILL.md` whose frontmatter contains `metadata.github-repo`, `metadata.github-ref`, or `metadata.github-tree-sha` (the Portable Provenance keys `gh skill` injects on install).
    4. **None of the above** — ask the user which manager to use. Do not guess.
-4. Use the selected manager to install the missing skills from `Maki-Daisuke/rat-coding`. Per-manager invocation:
-   - APM: `apm install Maki-Daisuke/rat-coding --skill rat-feature` (repeat `--skill` per skill).
-   - `npx skills`: `npx skills add Maki-Daisuke/rat-coding --skill rat-feature` (repeat `--skill` per skill).
-   - `gh skill`: `gh skill install Maki-Daisuke/rat-coding rat-feature` (one invocation per skill).
+4. Run the bundled install script from this skill's `scripts/` directory, passing the missing skill names as arguments:
+   - **macOS / Linux**: `scripts/install-skills.sh rat-feature rat-audit rat-architecture rat-compaction`
+   - **Windows**: `scripts/install-skills.ps1 rat-feature rat-audit rat-architecture rat-compaction`
 
-Keep the install project-scoped or runtime-scoped according to the selected manager's normal behavior; do not install Rat-Coding rules user-wide.
+   The script auto-detects both the skill manager (from the same markers as step 3) and the active editors, then installs each skill project-scoped without interactive prompts. All installs are project-scoped because all Rat-Coding artifacts must live alongside the project (see [_Why Rat-Coding Is Installed as Project Structure_](https://github.com/Maki-Daisuke/rat-coding/blob/main/doc/rationales.md#why-rat-coding-is-installed-as-project-structure)).
+
+5. If the script exits with code **2** (detection failed), it has printed manual install instructions to stderr. Show those instructions to the user and ask them to identify their skill manager and editor. Once they confirm, re-run with the correct invocation they provide, or follow the printed instructions together with the user.
 
 ### 4. Reload `AGENTS.md`
 
@@ -134,7 +135,6 @@ Write the filled files to:
 - `./README.md`
 - `./doc/rationales.md`
 - `./doc/design.md` (only if the user said yes in step 6)
-
 
 ### 8. Hand the keyboard back
 
